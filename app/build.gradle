@@ -28,12 +28,12 @@ android {
             storeFile file('C:/Users/Moh3nJ/Desktop/key.jks')
             storePassword '44404530'
         }
-        debug {
-            keyAlias 'mohsen'
-            keyPassword '44404530'
-            storeFile file('C:/Users/Moh3nJ/Desktop/key.jks')
-            storePassword '44404530'
-        }
+//        debug {
+//            keyAlias 'mohsen'
+//            keyPassword '44404530'
+//            storeFile file('C:/Users/Moh3nJ/Desktop/key.jks')
+//            storePassword '44404530'
+//        }
     }
 }
 

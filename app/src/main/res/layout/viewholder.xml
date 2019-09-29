@@ -12,6 +12,6 @@
         android:fontFamily="@font/lalezar"
         android:text="نکته بهداشتی"
         android:textAlignment="center"
-        android:textColor="@color/brown_800"
-        android:textSize="18sp" />
+        android:textColor="@color/blue_sky2"
+        android:textSize="14sp" />
 </LinearLayout>

@@ -5,13 +5,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.jamali.arbaeen.Domain.ShowList;
 import com.jamali.arbaeen.R;
 
 import java.util.ArrayList;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final ArrayList<ShowList> array_object;
@@ -52,13 +52,13 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder, parent, false);
             return new SubjectSubViewHolder(view);
         } else if (viewType == ROW_SUB) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder, parent, false);
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_row, parent, false);
             return new RowSubViewHolder(view);
         } else if (viewType == WARNING) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_warning, parent, false);
             return new WarningViewHolder(view);
         } else {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder, parent, false);
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_text, parent, false);
             return new TextViewHolder(view);
         }
     }
