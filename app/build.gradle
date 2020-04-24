@@ -4,18 +4,19 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.1"
     defaultConfig {
-        applicationId "com.jamali.arbaeen"
+        applicationId "com.jamali.esteghfar70"
         minSdkVersion 18
         targetSdkVersion 29
-        versionCode 1
+        versionCode 5
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+          }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -25,7 +26,7 @@ android {
         release {
             keyAlias 'mohsen'
             keyPassword '44404530'
-            storeFile file('C:/Users/Moh3nJ/Desktop/key.jks')
+            storeFile file('C:/Users/moh3n/Desktop/key.jks')
             storePassword '44404530'
         }
 //        debug {
