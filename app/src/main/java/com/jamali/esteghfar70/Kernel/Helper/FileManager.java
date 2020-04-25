@@ -62,7 +62,7 @@ public class FileManager {
             }
             return sb.toString().toUpperCase();
         } catch (java.security.NoSuchAlgorithmException e) {
-//            throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 

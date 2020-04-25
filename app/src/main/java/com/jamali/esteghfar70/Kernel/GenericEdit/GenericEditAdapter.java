@@ -61,7 +61,7 @@ public class GenericEditAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_edit_tv, parent, false);
             return new TextViewViewHolder(view);
         } else {
-//            throw new RuntimeException("only three view types are allowed: spinner, editText and checkbox");
+            throw new RuntimeException("only three view types are allowed: spinner, editText and checkbox");
         }
     }
 
