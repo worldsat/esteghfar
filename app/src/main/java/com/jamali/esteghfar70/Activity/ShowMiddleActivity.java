@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -38,6 +39,7 @@ public class ShowMiddleActivity extends BaseActivity implements SeekBar.OnSeekBa
     private boolean isPlaying = false;
     private Handler mHandler = new Handler();
     private int mFileDuration;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,8 +48,23 @@ public class ShowMiddleActivity extends BaseActivity implements SeekBar.OnSeekBa
         initview();
         media();
         timing();
+        translator();
         getData(false, false);
     }
+
+    private void translator() {
+        switch1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b){
+                    getData(false, true);
+                }else{
+                    getData(true, false);
+                }
+            }
+        });
+    }
+
     private void timing() {
         this.mFileDuration = this.medPlayer.getDuration();
         this.seekBar.setMax(this.mFileDuration / 1000);
@@ -65,19 +82,32 @@ public class ShowMiddleActivity extends BaseActivity implements SeekBar.OnSeekBa
         if (medPlayer == null) {
             medPlayer = MediaPlayer.create(this, R.raw.without_translate);
         }
-        medPlayer.setLooping(true);
+        seekBar.setMax(mFileDuration/1000);
+        String time = String.format("%02d:%02d",
+                TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
+                TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()))
+        );
+        String time2 = String.format("%02d:%02d",
+                TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()),
+                TimeUnit.MILLISECONDS.toSeconds(medPlayer.getCurrentPosition()) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()))
+        );
+
+        timeTxt.setText("00:00/" + time);
+//        medPlayer.setLooping(true);
         playBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!isPlaying) {
+                if (!medPlayer.isPlaying()) {
 
                     medPlayer.start();
-
+                    isPlaying = true;
                     Toast.makeText(ShowMiddleActivity.this, "موزیک در حال پخش", Toast.LENGTH_SHORT).show();
                     playBtn.setBackgroundResource(R.mipmap.pause);
 
 
-//Make sure you update Seekbar on UI thread
+                    //Make sure you update Seekbar on UI thread
                     ShowMiddleActivity.this.runOnUiThread(new Runnable() {
 
                         @Override
@@ -86,12 +116,12 @@ public class ShowMiddleActivity extends BaseActivity implements SeekBar.OnSeekBa
                                 int mCurrentPosition = medPlayer.getCurrentPosition() / 1000;
                                 seekBar.setProgress(mCurrentPosition);
                             }
-                            mHandler.postDelayed(this, 1000);
+//                            mHandler.postDelayed(this, 1000);
 
                             String time = String.format("%02d:%02d",
-                                    TimeUnit.MILLISECONDS.toMinutes( medPlayer.getDuration()),
-                                    TimeUnit.MILLISECONDS.toSeconds( medPlayer.getDuration()) -
-                                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes( medPlayer.getDuration()))
+                                    TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
+                                    TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) -
+                                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()))
                             );
                             String time2 = String.format("%02d:%02d",
                                     TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()),
@@ -99,16 +129,16 @@ public class ShowMiddleActivity extends BaseActivity implements SeekBar.OnSeekBa
                                             TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()))
                             );
 
-                            switch1.setText(time2+"/"+time);
+                            timeTxt.setText(time2 + "/" + time);
 
                             // Running this thread after 100 milliseconds
-                            mHandler.postDelayed(this, 100);
+                            mHandler.postDelayed(this, 1000);
 
                         }
                     });
                 } else {
                     medPlayer.pause();
-
+                    isPlaying = false;
                     Toast.makeText(ShowMiddleActivity.this, "موزیک موقتا متوقف شد", Toast.LENGTH_SHORT).show();
                     playBtn.setBackgroundResource(R.mipmap.play_icon);
                 }
