@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class ShowMiddleActivity extends BaseActivity implements SeekBar.OnSeekBarChangeListener {
+public class ShowMiddleActivity extends BaseActivity {
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private ArrayList<ShowList> response = new ArrayList<>();
@@ -36,7 +36,7 @@ public class ShowMiddleActivity extends BaseActivity implements SeekBar.OnSeekBa
     private TextView timeTxt;
     private SeekBar seekBar;
     private Switch switch1;
-    private boolean isPlaying = false;
+
     private Handler mHandler = new Handler();
     private int mFileDuration;
 
@@ -53,15 +53,30 @@ public class ShowMiddleActivity extends BaseActivity implements SeekBar.OnSeekBa
     }
 
     private void translator() {
-        switch1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if(b){
-                    getData(false, true);
-                }else{
-                    getData(true, false);
+        switch1.setOnCheckedChangeListener((compoundButton, b) -> {
+            if (b) {
+                getData(false, true);
+
+                if (medPlayer != null) {
+                    if (medPlayer.isPlaying()) {
+                        medPlayer.stop();
+                        playBtn.setBackgroundResource(R.mipmap.pause);
+                    }
+                    medPlayer = MediaPlayer.create(ShowMiddleActivity.this, R.raw.full);
+                }
+
+            } else {
+                getData(true, false);
+
+                if (medPlayer != null) {
+                    if (medPlayer.isPlaying()) {
+                        medPlayer.stop();
+                        playBtn.setBackgroundResource(R.mipmap.play_icon);
+                    }
+                    medPlayer = MediaPlayer.create(ShowMiddleActivity.this, R.raw.without_translate);
                 }
             }
+            setup();
         });
     }
 
@@ -78,23 +93,23 @@ public class ShowMiddleActivity extends BaseActivity implements SeekBar.OnSeekBa
         playBtn.setBackgroundResource(R.mipmap.play_icon);
     }
 
-    private void media() {
-        if (medPlayer == null) {
-            medPlayer = MediaPlayer.create(this, R.raw.without_translate);
-        }
-        seekBar.setMax(mFileDuration/1000);
+    private void setup() {
+        seekBar.setMax(mFileDuration / 1000);
         String time = String.format("%02d:%02d",
                 TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
                 TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) -
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()))
         );
-        String time2 = String.format("%02d:%02d",
-                TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()),
-                TimeUnit.MILLISECONDS.toSeconds(medPlayer.getCurrentPosition()) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()))
-        );
 
         timeTxt.setText("00:00/" + time);
+    }
+
+    private void media() {
+        seekBar.setRotation(180);
+        if (medPlayer == null) {
+            medPlayer = MediaPlayer.create(this, R.raw.full);
+        }
+        setup();
 //        medPlayer.setLooping(true);
         playBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,8 +117,8 @@ public class ShowMiddleActivity extends BaseActivity implements SeekBar.OnSeekBa
                 if (!medPlayer.isPlaying()) {
 
                     medPlayer.start();
-                    isPlaying = true;
-                    Toast.makeText(ShowMiddleActivity.this, "موزیک در حال پخش", Toast.LENGTH_SHORT).show();
+
+                    Toast.makeText(ShowMiddleActivity.this, "صوت در حال پخش", Toast.LENGTH_SHORT).show();
                     playBtn.setBackgroundResource(R.mipmap.pause);
 
 
@@ -132,14 +147,14 @@ public class ShowMiddleActivity extends BaseActivity implements SeekBar.OnSeekBa
                             timeTxt.setText(time2 + "/" + time);
 
                             // Running this thread after 100 milliseconds
-                            mHandler.postDelayed(this, 1000);
+                            mHandler.postDelayed(this, 100);
 
                         }
                     });
                 } else {
                     medPlayer.pause();
-                    isPlaying = false;
-                    Toast.makeText(ShowMiddleActivity.this, "موزیک موقتا متوقف شد", Toast.LENGTH_SHORT).show();
+
+                    Toast.makeText(ShowMiddleActivity.this, "صوت متوقف شد", Toast.LENGTH_SHORT).show();
                     playBtn.setBackgroundResource(R.mipmap.play_icon);
                 }
             }
@@ -204,18 +219,5 @@ public class ShowMiddleActivity extends BaseActivity implements SeekBar.OnSeekBa
         switch1 = findViewById(R.id.switch1);
     }
 
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
 
-    }
-
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-
-    }
-
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
-
-    }
 }
