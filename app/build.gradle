@@ -26,7 +26,7 @@ android {
         release {
             keyAlias 'mohsen'
             keyPassword '44404530'
-            storeFile file('C:/Users/moh3n/Desktop/key.jks')
+            storeFile file('C:/Users/sepideh/Desktop/key.jks')
             storePassword '44404530'
         }
 //        debug {
