@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.jamali.esteghfar70.Adapter.ShowItemListAdapter;
 import com.jamali.esteghfar70.Domain.ShowList;
 import com.jamali.esteghfar70.Kernel.Activity.BaseActivity;
+import com.jamali.esteghfar70.Kernel.Controller.Bll.SettingsBll;
 import com.jamali.esteghfar70.Kernel.Controller.Domain.Filter;
 import com.jamali.esteghfar70.Kernel.Controller.Interface.CallbackGet;
 import com.jamali.esteghfar70.R;
@@ -89,7 +90,7 @@ public class ShowMiddleActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         medPlayer.pause();
-        Toast.makeText(ShowMiddleActivity.this, "موزیک موقتا متوقف شد", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(ShowMiddleActivity.this, "موزیک موقتا متوقف شد", Toast.LENGTH_SHORT).show();
         playBtn.setBackgroundResource(R.mipmap.play_icon);
     }
 
@@ -181,6 +182,8 @@ public class ShowMiddleActivity extends BaseActivity {
     }
 
     private void getData(boolean filter, boolean switching) {
+        SettingsBll settingsBll=new SettingsBll(this);
+        settingsBll.setMode(false);
         position = getIntent().getIntExtra("Position", 0);
         List = getIntent().getIntExtra("List", 0);
         ArrayList<Filter> filters = new ArrayList<Filter>();
@@ -190,7 +193,8 @@ public class ShowMiddleActivity extends BaseActivity {
         controller().Get(ShowList.class, filters, 1, 1, true, new CallbackGet() {
             @Override
             public <T> void onSuccess(ArrayList<T> result, int count) {
-                Log.i(TAG, "onSuccess: " + result);
+//                Toast.makeText(ShowMiddleActivity.this, result.toString(), Toast.LENGTH_SHORT).show();
+//                Log.i(TAG, "onSuccess: " + result);
                 LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ShowMiddleActivity.this);
                 recyclerView.setLayoutManager(linearLayoutManager);
                 response.clear();

@@ -12,20 +12,20 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.jamali.esteghfar70.Activity.SplashActivity">
+        <activity android:name="com.jamali.esteghfar70.Activity.SplashActivity" android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.jamali.esteghfar70.Activity.MiddleActivity" />
-        <activity android:name="com.jamali.esteghfar70.Activity.AfterActivity" />
-        <activity android:name="com.jamali.esteghfar70.Activity.BeforeActivity" />
-        <activity android:name="com.jamali.esteghfar70.Activity.ShowMiddleActivity">
+        <activity android:name="com.jamali.esteghfar70.Activity.MiddleActivity" android:screenOrientation="portrait" />
+        <activity android:name="com.jamali.esteghfar70.Activity.AfterActivity" android:screenOrientation="portrait"  />
+        <activity android:name="com.jamali.esteghfar70.Activity.BeforeActivity" android:screenOrientation="portrait" />
+        <activity android:name="com.jamali.esteghfar70.Activity.ShowMiddleActivity" android:screenOrientation="portrait" >
 
         </activity>
-        <activity android:name="com.jamali.esteghfar70.Activity.MainActivity">
+        <activity android:name="com.jamali.esteghfar70.Activity.MainActivity" android:screenOrientation="portrait" >
 
         </activity>
     </application>

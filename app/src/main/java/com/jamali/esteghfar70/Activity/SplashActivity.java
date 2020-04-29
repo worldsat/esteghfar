@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.jamali.esteghfar70.Kernel.Controller.Module.Glide.Glide_module;
 import com.jamali.esteghfar70.Kernel.Helper.FileManager;
@@ -18,6 +19,7 @@ import java.io.InputStream;
 
 public class SplashActivity extends AppCompatActivity {
     private Handler mHandler = new Handler();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +50,7 @@ public class SplashActivity extends AppCompatActivity {
                         Intent intent = new Intent(SplashActivity.this, ShowMiddleActivity.class);
                         startActivity(intent);
 
-                    }, 2000);
+                    }, 3000);
 //
                 });
                 runOnUiThread(() -> {
@@ -60,33 +62,36 @@ public class SplashActivity extends AppCompatActivity {
         }).start();
 
     }
+
     private void moveDB() {
         String src = getCacheDir() + "/arbaeen.db";
         String des = getFilesDir().getParent() + "/databases/arbaeen.db";
         File n = new File(des);
-//        if (!n.exists()) {
-        File f = new File(getCacheDir() + "/arbaeen.db");
-        if (!f.exists()) try {
+        if (!n.exists()) {
+            File f = new File(getCacheDir() + "/arbaeen.db");
+            if (!f.exists()) try {
 
-            InputStream is = getAssets().open("arbaeen.db");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
+                InputStream is = getAssets().open("arbaeen.db");
+                int size = is.available();
+                byte[] buffer = new byte[size];
+                is.read(buffer);
+                is.close();
 
 
-            FileOutputStream fos = new FileOutputStream(f);
-            fos.write(buffer);
-            fos.close();
-        } catch (Exception e) {
+                FileOutputStream fos = new FileOutputStream(f);
+                fos.write(buffer);
+                fos.close();
+//                Toast.makeText(this, "ok", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+//                Toast.makeText(this, "1"+e.toString(), Toast.LENGTH_SHORT).show();
 //                throw new RuntimeException(e);
+            }
+            try {
+                FileManager.copyFile(src, des);
+            } catch (IOException e) {
+//                Toast.makeText(this, "2"+e.toString(), Toast.LENGTH_SHORT).show();
+            }
         }
-        try {
-            FileManager.copyFile(src, des);
-        } catch (IOException e) {
-
-        }
-//        }
     }
 
 }
