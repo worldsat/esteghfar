@@ -7,7 +7,7 @@ android {
         applicationId "com.jamali.esteghfar70"
         minSdkVersion 18
         targetSdkVersion 29
-        versionCode 6
+        versionCode 7
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -15,7 +15,7 @@ android {
         release {
             minifyEnabled false
             shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles 'proguard-android.txt', getDefaultProguardFile('proguard-android.txt')
           }
     }
     compileOptions {
@@ -59,5 +59,7 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
     implementation 'org.apache.commons:commons-lang3:3.8.1'
     api 'com.google.guava:guava:27.0.1-android'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0-rc02'
+    implementation 'androidx.recyclerview:recyclerview:1.2.0-alpha02'
+    implementation 'com.infstory:proguard-snippets:1.0.0'
+    implementation 'com.github.yongjhih.android-proguards:android-proguards-all:-SNAPSHOT'
 }

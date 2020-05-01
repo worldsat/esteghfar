@@ -64,6 +64,8 @@ public class ShowMiddleActivity extends BaseActivity {
                         playBtn.setBackgroundResource(R.mipmap.pause);
                     }
                     medPlayer = MediaPlayer.create(ShowMiddleActivity.this, R.raw.full);
+                    timing();
+                    setup();
                 }
 
             } else {
@@ -75,9 +77,10 @@ public class ShowMiddleActivity extends BaseActivity {
                         playBtn.setBackgroundResource(R.mipmap.play_icon);
                     }
                     medPlayer = MediaPlayer.create(ShowMiddleActivity.this, R.raw.without_translate);
+                    setup();
+                    timing();
                 }
             }
-            setup();
         });
     }
 
@@ -182,7 +185,7 @@ public class ShowMiddleActivity extends BaseActivity {
     }
 
     private void getData(boolean filter, boolean switching) {
-        SettingsBll settingsBll=new SettingsBll(this);
+        SettingsBll settingsBll = new SettingsBll(this);
         settingsBll.setMode(false);
         position = getIntent().getIntExtra("Position", 0);
         List = getIntent().getIntExtra("List", 0);
@@ -194,7 +197,7 @@ public class ShowMiddleActivity extends BaseActivity {
             @Override
             public <T> void onSuccess(ArrayList<T> result, int count) {
 //                Toast.makeText(ShowMiddleActivity.this, result.toString(), Toast.LENGTH_SHORT).show();
-//                Log.i(TAG, "onSuccess: " + result);
+                Log.i(TAG, "onSuccess: " + result);
                 LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ShowMiddleActivity.this);
                 recyclerView.setLayoutManager(linearLayoutManager);
                 response.clear();
