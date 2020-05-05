@@ -73,7 +73,7 @@ public class MainActivity extends BaseActivity {
             startActivity(intent);
         });
         btn3.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, AfterActivity.class);
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
 
             startActivity(intent);
         });

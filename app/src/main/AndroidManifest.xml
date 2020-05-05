@@ -20,7 +20,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.jamali.esteghfar70.Activity.MiddleActivity" android:screenOrientation="portrait" />
-        <activity android:name="com.jamali.esteghfar70.Activity.AfterActivity" android:screenOrientation="portrait"  />
+        <activity android:name="com.jamali.esteghfar70.Activity.SettingsActivity" android:screenOrientation="portrait"  />
         <activity android:name="com.jamali.esteghfar70.Activity.BeforeActivity" android:screenOrientation="portrait" />
         <activity android:name="com.jamali.esteghfar70.Activity.ShowMiddleActivity" android:screenOrientation="portrait" >
 

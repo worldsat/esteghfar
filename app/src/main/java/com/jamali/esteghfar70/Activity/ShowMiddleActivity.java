@@ -1,12 +1,15 @@
 package com.jamali.esteghfar70.Activity;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -37,7 +40,7 @@ public class ShowMiddleActivity extends BaseActivity {
     private TextView timeTxt;
     private SeekBar seekBar;
     private Switch switch1;
-
+private ImageView SettingBtn;
     private Handler mHandler = new Handler();
     private int mFileDuration;
 
@@ -51,6 +54,11 @@ public class ShowMiddleActivity extends BaseActivity {
         timing();
         translator();
         getData(false, false);
+        setVariable();
+    }
+
+    private void setVariable() {
+        SettingBtn.setOnClickListener(view -> startActivity(new Intent(ShowMiddleActivity.this, SettingsActivity.class)));
     }
 
     private void translator() {
@@ -120,8 +128,13 @@ public class ShowMiddleActivity extends BaseActivity {
             public void onClick(View view) {
                 if (!medPlayer.isPlaying()) {
 
+//                    medPlayer.start();
+                    SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
+                    float speed = sp.getFloat("speed",1.0f);
+                    if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.M) {
+                        medPlayer.setPlaybackParams(medPlayer.getPlaybackParams().setSpeed(speed));
+                    }
                     medPlayer.start();
-
                     Toast.makeText(ShowMiddleActivity.this, "صوت در حال پخش", Toast.LENGTH_SHORT).show();
                     playBtn.setBackgroundResource(R.mipmap.pause);
 
@@ -157,7 +170,11 @@ public class ShowMiddleActivity extends BaseActivity {
                     });
                 } else {
                     medPlayer.pause();
-
+//                    if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
+//
+//                        medPlayer.reset();
+//
+//                    }
                     Toast.makeText(ShowMiddleActivity.this, "صوت متوقف شد", Toast.LENGTH_SHORT).show();
                     playBtn.setBackgroundResource(R.mipmap.play_icon);
                 }
@@ -182,6 +199,7 @@ public class ShowMiddleActivity extends BaseActivity {
                 }
             }
         });
+
     }
 
     private void getData(boolean filter, boolean switching) {
@@ -224,6 +242,7 @@ public class ShowMiddleActivity extends BaseActivity {
         timeTxt = findViewById(R.id.timeTxt);
         seekBar = findViewById(R.id.seekBar);
         switch1 = findViewById(R.id.switch1);
+        SettingBtn=findViewById(R.id.settingsBtn);
     }
 
 
