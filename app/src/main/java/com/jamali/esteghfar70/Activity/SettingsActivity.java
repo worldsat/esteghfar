@@ -4,6 +4,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 
 import com.jamali.esteghfar70.Adapter.AfterListAdapter;
@@ -21,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 public class SettingsActivity extends BaseActivity {
 
     RadioGroup rg;
+    CheckBox checkBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +39,7 @@ public class SettingsActivity extends BaseActivity {
 
         SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
         String speed = String.valueOf(sp.getFloat("speed", 1.0f));
-        Log.i(TAG, "setVariable: "+speed);
+        Log.i(TAG, "setVariable: " + speed);
         switch (speed) {
             case "1.0":
                 rg.check(R.id.radioButton);
@@ -81,10 +84,20 @@ public class SettingsActivity extends BaseActivity {
                     break;
             }
         });
+        checkBox.setChecked(sp.getBoolean("scrollToPosition", true));
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                sp.edit().putBoolean("scrollToPosition", b).apply();
+            }
+        });
+
+
     }
 
 
     private void initview() {
         rg = findViewById(R.id.radioGroup);
+        checkBox = findViewById(R.id.scrollToPosition);
     }
 }

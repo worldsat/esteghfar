@@ -1,8 +1,10 @@
 package com.jamali.esteghfar70.Adapter;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,14 +17,22 @@ import java.util.ArrayList;
 
 public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final ArrayList<ShowList> array_object;
-
+    private int position;
+    private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            row_index = position;
+            notifyDataSetChanged();
+        }
+    };
     private static final int TEXT = 0;
     private static final int SUBJECT = 1;
     private static final int ROW = 2;
     private static final int ROW2 = 3;
     private static final int SUBJECT_SUB = 4;
-    private static final int ROW_SUB = 5 ;
+    private static final int ROW_SUB = 5;
     private static final int WARNING = 6;
+    private int row_index = -1;
 
     public ShowItemListAdapter(ArrayList<ShowList> result) {
 
@@ -38,6 +48,7 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         if (viewType == TEXT) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_text, parent, false);
+            view.setOnClickListener(mOnClickListener);
             return new TextViewHolder(view);
         } else if (viewType == SUBJECT) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder, parent, false);
@@ -79,7 +90,7 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             initSubjectSub((SubjectSubViewHolder) holder, position);
         } else if (holder instanceof RowSubViewHolder) {
             initRowSub((RowSubViewHolder) holder, position);
-        }else if (holder instanceof WarningViewHolder) {
+        } else if (holder instanceof WarningViewHolder) {
             initWarning((WarningViewHolder) holder, position);
         }
 
@@ -87,23 +98,45 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     private void initText(TextViewHolder holder, int position) {
+
         holder.title.setText(array_object.get(position).getSubject());
+        holder.Linear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                row_index = position;
+                notifyDataSetChanged();
+            }
+        });
+        if (row_index == position) {
+//            holder.Linear.setBackgroundColor(Color.parseColor("#FFF59D"));
+            holder.Linear.setBackgroundColor(Color.parseColor("#78A4FD7A"));
+//            holder.title.setTextColor(Color.parseColor("#00ffffff"));
+        } else {
+            holder.Linear.setBackgroundColor(Color.parseColor("#00ffffff"));
+//            holder.title.setTextColor(Color.parseColor("#000000"));
+        }
     }
+
     private void initSubject(SubjectViewHolder holder, int position) {
         holder.title.setText(array_object.get(position).getSubject());
     }
+
     private void initRow(RowViewHolder holder, int position) {
         holder.title.setText(array_object.get(position).getSubject());
     }
+
     private void initRow2(Row2ViewHolder holder, int position) {
         holder.title.setText(array_object.get(position).getSubject());
     }
+
     private void initSubjectSub(SubjectSubViewHolder holder, int position) {
         holder.title.setText(array_object.get(position).getSubject());
     }
+
     private void initRowSub(RowSubViewHolder holder, int position) {
         holder.title.setText(array_object.get(position).getSubject());
     }
+
     private void initWarning(WarningViewHolder holder, int position) {
         holder.title.setText(array_object.get(position).getSubject());
     }
@@ -144,10 +177,12 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     class TextViewHolder extends RecyclerView.ViewHolder {
         TextView title;
+        LinearLayout Linear;
 
         private TextViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.title);
+            Linear = itemView.findViewById(R.id.Linear);
         }
     }
 

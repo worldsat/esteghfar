@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 
 import com.jamali.esteghfar70.Adapter.ShowItemListAdapter;
 import com.jamali.esteghfar70.Domain.ShowList;
+import com.jamali.esteghfar70.Helper.ScrollToPosition;
 import com.jamali.esteghfar70.Kernel.Activity.BaseActivity;
 import com.jamali.esteghfar70.Kernel.Controller.Bll.SettingsBll;
 import com.jamali.esteghfar70.Kernel.Controller.Domain.Filter;
@@ -40,7 +42,7 @@ public class ShowMiddleActivity extends BaseActivity {
     private TextView timeTxt;
     private SeekBar seekBar;
     private Switch switch1;
-private ImageView SettingBtn;
+    private ImageView SettingBtn;
     private Handler mHandler = new Handler();
     private int mFileDuration;
 
@@ -117,6 +119,8 @@ private ImageView SettingBtn;
     }
 
     private void media() {
+        ScrollToPosition scrollToPosition = new ScrollToPosition(recyclerView);
+
         seekBar.setRotation(180);
         if (medPlayer == null) {
             medPlayer = MediaPlayer.create(this, R.raw.full);
@@ -130,8 +134,8 @@ private ImageView SettingBtn;
 
 //                    medPlayer.start();
                     SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
-                    float speed = sp.getFloat("speed",1.0f);
-                    if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.M) {
+                    float speed = sp.getFloat("speed", 1.0f);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         medPlayer.setPlaybackParams(medPlayer.getPlaybackParams().setSpeed(speed));
                     }
                     medPlayer.start();
@@ -144,9 +148,15 @@ private ImageView SettingBtn;
 
                         @Override
                         public void run() {
-                            if (medPlayer != null) {
+                            if (medPlayer != null && medPlayer.isPlaying()) {
+
                                 int mCurrentPosition = medPlayer.getCurrentPosition() / 1000;
+                                Log.i(TAG, "run: " + mCurrentPosition);
                                 seekBar.setProgress(mCurrentPosition);
+
+                                if (sp.getBoolean("scrollToPosition", true)) {
+                                    scrollToPosition.GoTo(mCurrentPosition);
+                                }
                             }
 //                            mHandler.postDelayed(this, 1000);
 
@@ -242,7 +252,7 @@ private ImageView SettingBtn;
         timeTxt = findViewById(R.id.timeTxt);
         seekBar = findViewById(R.id.seekBar);
         switch1 = findViewById(R.id.switch1);
-        SettingBtn=findViewById(R.id.settingsBtn);
+        SettingBtn = findViewById(R.id.settingsBtn);
     }
 
 

@@ -31,7 +31,8 @@ public class SplashActivity extends AppCompatActivity {
         moveDB();
 
         SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
-        sp.edit().putFloat("speed",1.0f).apply();
+        sp.edit().putFloat("speed", 1.0f).apply();
+        sp.edit().putBoolean("scrollToPosition", true).apply();
     }
 
     private void animLogo() {
@@ -72,31 +73,30 @@ public class SplashActivity extends AppCompatActivity {
         String des = getFilesDir().getParent() + "/databases/arbaeen.db";
         File n = new File(des);
 //        if (!n.exists()) {
-            File f = new File(getCacheDir() + "/arbaeen.db");
+        File f = new File(getCacheDir() + "/arbaeen.db");
 //            if (!f.exists())
-            try {
+        try {
 
-                InputStream is = getAssets().open("arbaeen.db");
-                int size = is.available();
-                byte[] buffer = new byte[size];
-                is.read(buffer);
-                is.close();
+            InputStream is = getAssets().open("arbaeen.db");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
 
 
-
-                FileOutputStream fos = new FileOutputStream(f);
-                fos.write(buffer);
-                fos.close();
+            FileOutputStream fos = new FileOutputStream(f);
+            fos.write(buffer);
+            fos.close();
 //                Toast.makeText(this, "ok", Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
+        } catch (Exception e) {
 //                Toast.makeText(this, "1"+e.toString(), Toast.LENGTH_SHORT).show();
 //                throw new RuntimeException(e);
-            }
-            try {
-                FileManager.copyFile(src, des);
-            } catch (IOException e) {
+        }
+        try {
+            FileManager.copyFile(src, des);
+        } catch (IOException e) {
 //                Toast.makeText(this, "2"+e.toString(), Toast.LENGTH_SHORT).show();
-            }
+        }
 //        }
     }
 
