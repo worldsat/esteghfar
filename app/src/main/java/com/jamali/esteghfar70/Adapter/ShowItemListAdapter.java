@@ -107,14 +107,21 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 notifyDataSetChanged();
             }
         });
-        if (row_index == position) {
-//            holder.Linear.setBackgroundColor(Color.parseColor("#FFF59D"));
-            holder.Linear.setBackgroundColor(Color.parseColor("#78A4FD7A"));
-//            holder.title.setTextColor(Color.parseColor("#00ffffff"));
-        } else {
+        if (array_object.get(position).getSeleccted().equals("0")) {
             holder.Linear.setBackgroundColor(Color.parseColor("#00ffffff"));
-//            holder.title.setTextColor(Color.parseColor("#000000"));
+        } else {
+            holder.Linear.setBackgroundColor(Color.parseColor("#78A4FD7A"));
         }
+
+
+//        if (row_index == position) {
+////            holder.Linear.setBackgroundColor(Color.parseColor("#FFF59D"));
+//            holder.Linear.setBackgroundColor(Color.parseColor("#78A4FD7A"));
+////            holder.title.setTextColor(Color.parseColor("#00ffffff"));
+//        } else {
+//            holder.Linear.setBackgroundColor(Color.parseColor("#00ffffff"));
+////            holder.title.setTextColor(Color.parseColor("#000000"));
+//        }
     }
 
     private void initSubject(SubjectViewHolder holder, int position) {

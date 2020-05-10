@@ -6,9 +6,18 @@ public class ShowList extends BaseDomain {
     private String Id;
     private String Subject;
     private String Kind;
+    private String seleccted;
 
     public ShowList() {
         setTableName("1_1");
+    }
+
+    public String getSeleccted() {
+        return seleccted;
+    }
+
+    public void setSeleccted(String seleccted) {
+        this.seleccted = seleccted;
     }
 
     public String getKind() {

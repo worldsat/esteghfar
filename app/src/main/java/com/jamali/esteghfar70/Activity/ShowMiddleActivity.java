@@ -45,6 +45,7 @@ public class ShowMiddleActivity extends BaseActivity {
     private ImageView SettingBtn;
     private Handler mHandler = new Handler();
     private int mFileDuration;
+    private boolean translate = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +53,8 @@ public class ShowMiddleActivity extends BaseActivity {
         setContentView(R.layout.activity_middle);
         getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         initview();
-        media();
-        timing();
+
+
         translator();
         getData(false, false);
         setVariable();
@@ -76,6 +77,7 @@ public class ShowMiddleActivity extends BaseActivity {
                     medPlayer = MediaPlayer.create(ShowMiddleActivity.this, R.raw.full);
                     timing();
                     setup();
+                    translate = true;
                 }
 
             } else {
@@ -89,6 +91,7 @@ public class ShowMiddleActivity extends BaseActivity {
                     medPlayer = MediaPlayer.create(ShowMiddleActivity.this, R.raw.without_translate);
                     setup();
                     timing();
+                    translate = false;
                 }
             }
         });
@@ -119,7 +122,7 @@ public class ShowMiddleActivity extends BaseActivity {
     }
 
     private void media() {
-        ScrollToPosition scrollToPosition = new ScrollToPosition(recyclerView);
+        ScrollToPosition scrollToPosition = new ScrollToPosition(recyclerView, response, adapter);
 
         seekBar.setRotation(180);
         if (medPlayer == null) {
@@ -155,7 +158,9 @@ public class ShowMiddleActivity extends BaseActivity {
                                 seekBar.setProgress(mCurrentPosition);
 
                                 if (sp.getBoolean("scrollToPosition", true)) {
-                                    scrollToPosition.GoTo(mCurrentPosition);
+                                    if (!translate) {
+                                        scrollToPosition.GoTo(scrollToPosition.getPosFromSound(mCurrentPosition));
+                                    }
                                 }
                             }
 //                            mHandler.postDelayed(this, 1000);
@@ -230,12 +235,18 @@ public class ShowMiddleActivity extends BaseActivity {
                 recyclerView.setLayoutManager(linearLayoutManager);
                 response.clear();
                 response.addAll((Collection<? extends ShowList>) result);
+                for (int i = 0; i < response.size(); i++) {
+                    response.get(i).setSeleccted("0");
+                }
                 if (switching) {
                     adapter.notifyDataSetChanged();
                     return;
                 }
                 adapter = new ShowItemListAdapter(response);
+
                 recyclerView.setAdapter(adapter);
+                media();
+                timing();
             }
 
             @Override
