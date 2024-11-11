@@ -16,7 +16,7 @@ import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
 
-import com.google.android.material.snackbar.Snackbar;
+//import com.google.android.material.snackbar.Snackbar;
 import com.jamali.esteghfar70.R;
 
 import java.io.File;
@@ -25,32 +25,32 @@ public class SnakBarDownload {
     public void snakShow(final Context context, String str, final String fileName) {
 
 
-        final Snackbar snackbar = Snackbar.make(((Activity) context).findViewById(android.R.id.content), str, Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction("بازکردن فایل", new View.OnClickListener() {
-            @Override
-            public void onClick(View vv) {
-
-                File root = new File(Environment.getExternalStorageDirectory() + "/Mahpad/", fileName);
-
-                try {
-                    openFile(context, root);
-                } catch (ActivityNotFoundException e) {
-                    Log.i("moh3n", "onClick: " + e.toString());
-                }
-            }
-        });
-
-
-        // Changing action button text color
-        View sbView = snackbar.getView();
-        TextView textView = sbView.findViewById(R.id.snackbar_text);
-        TextView action = sbView.findViewById(R.id.snackbar_action);
-        textView.setTextColor(Color.WHITE);
-        action.setTextColor(Color.RED);
-        Typeface font = Typeface.createFromAsset(context.getAssets(), "fonts/iransans_m.ttf");
-        textView.setTypeface(font);
-        action.setTypeface(font);
-        snackbar.show();
+//        final Snackbar snackbar = Snackbar.make(((Activity) context).findViewById(android.R.id.content), str, Snackbar.LENGTH_INDEFINITE);
+//        snackbar.setAction("بازکردن فایل", new View.OnClickListener() {
+//            @Override
+//            public void onClick(View vv) {
+//
+//                File root = new File(Environment.getExternalStorageDirectory() + "/Mahpad/", fileName);
+//
+//                try {
+//                    openFile(context, root);
+//                } catch (ActivityNotFoundException e) {
+//                    Log.i("moh3n", "onClick: " + e.toString());
+//                }
+//            }
+//        });
+//
+//
+//        // Changing action button text color
+//        View sbView = snackbar.getView();
+//        TextView textView = sbView.findViewById(R.id.snackbar_text);
+//        TextView action = sbView.findViewById(R.id.snackbar_action);
+//        textView.setTextColor(Color.WHITE);
+//        action.setTextColor(Color.RED);
+//        Typeface font = Typeface.createFromAsset(context.getAssets(), "fonts/iransans_m.ttf");
+//        textView.setTypeface(font);
+//        action.setTypeface(font);
+//        snackbar.show();
 
     }
 

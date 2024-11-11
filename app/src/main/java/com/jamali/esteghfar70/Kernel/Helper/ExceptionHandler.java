@@ -7,7 +7,7 @@ import android.os.Environment;
 import android.util.Log;
 
 
-import com.jamali.esteghfar70.BuildConfig;
+
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -61,7 +61,7 @@ public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
             writer.println("Host: " + Build.HOST);
             writer.println("Fingerprint: " + Build.FINGERPRINT);
             writer.println("Version Code: " + Build.VERSION.RELEASE);
-            writer.println("Version app: " + BuildConfig.VERSION_NAME);
+//            writer.println("Version app: " + BuildConfig.VERSION_NAME);
             try {
 
                 SharedPreferences sp = c.getSharedPreferences("Token", 0);

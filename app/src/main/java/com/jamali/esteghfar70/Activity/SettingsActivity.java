@@ -63,25 +63,18 @@ public class SettingsActivity extends BaseActivity {
 
 
         rg.setOnCheckedChangeListener((group, checkedId) -> {
-            switch (checkedId) {
-                case R.id.radioButton:
-                    sp.edit().putFloat("speed", 1.0f).apply();
-                    break;
-                case R.id.radioButton2:
-                    sp.edit().putFloat("speed", 1.1f).apply();
-                    break;
-                case R.id.radioButton3:
-                    sp.edit().putFloat("speed", 1.2f).apply();
-                    break;
-                case R.id.radioButton4:
-                    sp.edit().putFloat("speed", 1.3f).apply();
-                    break;
-                case R.id.radioButton5:
-                    sp.edit().putFloat("speed", 1.4f).apply();
-                    break;
-                case R.id.radioButton6:
-                    sp.edit().putFloat("speed", 1.5f).apply();
-                    break;
+            if (checkedId == R.id.radioButton) {
+                sp.edit().putFloat("speed", 1.0f).apply();
+            } else if (checkedId == R.id.radioButton2) {
+                sp.edit().putFloat("speed", 1.1f).apply();
+            } else if (checkedId == R.id.radioButton3) {
+                sp.edit().putFloat("speed", 1.2f).apply();
+            } else if (checkedId == R.id.radioButton4) {
+                sp.edit().putFloat("speed", 1.3f).apply();
+            } else if (checkedId == R.id.radioButton5) {
+                sp.edit().putFloat("speed", 1.4f).apply();
+            } else if (checkedId == R.id.radioButton6) {
+                sp.edit().putFloat("speed", 1.5f).apply();
             }
         });
         checkBox.setChecked(sp.getBoolean("scrollToPosition", true));

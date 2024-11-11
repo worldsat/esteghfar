@@ -25,7 +25,7 @@
         android:layout_weight="0.6"
         android:background="@drawable/background_edittext_gray"
         android:popupBackground="@color/light_gray"
-        android:popupElevation="@dimen/cardview_default_elevation"
+        android:popupElevation="3dp"
         android:spinnerMode="dialog"
         android:textAlignment="center"
         app:layout_constraintBottom_toTopOf="@+id/editText2"
