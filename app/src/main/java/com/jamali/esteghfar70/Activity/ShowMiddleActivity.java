@@ -105,107 +105,72 @@ public class ShowMiddleActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        medPlayer.pause();
-//        Toast.makeText(ShowMiddleActivity.this, "موزیک موقتا متوقف شد", Toast.LENGTH_SHORT).show();
-        playBtn.setBackgroundResource(R.mipmap.play_icon);
+        if (medPlayer != null) {
+            medPlayer.pause();
+            playBtn.setBackgroundResource(R.mipmap.play_icon);
+            mHandler.removeCallbacks(updateSeekBar); // توقف به‌روزرسانی SeekBar هنگام مکث
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (medPlayer != null) {
+            medPlayer.release(); // تخریب MediaPlayer هنگام نابودی اکتیویتی
+            medPlayer = null;
+            mHandler.removeCallbacks(updateSeekBar); // توقف Handler هنگام نابودی اکتیویتی
+        }
     }
 
     private void setup() {
-        seekBar.setMax(mFileDuration / 1000);
-        String time = String.format("%02d:%02d",
-                TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
-                TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()))
-        );
+        if (medPlayer != null) {
+            mFileDuration = medPlayer.getDuration();
+            seekBar.setMax(mFileDuration / 1000);
 
-        timeTxt.setText("00:00/" + time);
+            String time = String.format("%02d:%02d",
+                    TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
+                    TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) -
+                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()))
+            );
+            timeTxt.setText("00:00/" + time);
+        }
     }
 
     private void media() {
         ScrollToPosition scrollToPosition = new ScrollToPosition(recyclerView, response, adapter);
-
         seekBar.setRotation(180);
+
         if (medPlayer == null) {
             medPlayer = MediaPlayer.create(this, R.raw.full);
         }
         setup();
-//        medPlayer.setLooping(true);
-        playBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!medPlayer.isPlaying()) {
 
-//                    medPlayer.start();
-                    SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
-                    float speed = sp.getFloat("speed", 1.0f);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        medPlayer.setPlaybackParams(medPlayer.getPlaybackParams().setSpeed(speed));
-                    }
-                    medPlayer.start();
-                    Toast.makeText(ShowMiddleActivity.this, "صوت در حال پخش", Toast.LENGTH_SHORT).show();
-                    playBtn.setBackgroundResource(R.mipmap.pause);
-
-
-                    //Make sure you update Seekbar on UI thread
-                    ShowMiddleActivity.this.runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            if (medPlayer != null && medPlayer.isPlaying()) {
-
-                                int mCurrentPosition = medPlayer.getCurrentPosition() / 1000;
-                                Log.i(TAG, "run: " + mCurrentPosition);
-                                seekBar.setProgress(mCurrentPosition);
-
-                                if (sp.getBoolean("scrollToPosition", true)) {
-                                    if (!translate) {
-                                        scrollToPosition.GoTo(scrollToPosition.getPosFromSound(mCurrentPosition));
-                                    }
-                                }
-                            }
-//                            mHandler.postDelayed(this, 1000);
-
-                            String time = String.format("%02d:%02d",
-                                    TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
-                                    TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) -
-                                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()))
-                            );
-                            String time2 = String.format("%02d:%02d",
-                                    TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()),
-                                    TimeUnit.MILLISECONDS.toSeconds(medPlayer.getCurrentPosition()) -
-                                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()))
-                            );
-
-                            timeTxt.setText(time2 + "/" + time);
-
-                            // Running this thread after 100 milliseconds
-                            mHandler.postDelayed(this, 100);
-
-                        }
-                    });
-                } else {
-                    medPlayer.pause();
-//                    if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
-//
-//                        medPlayer.reset();
-//
-//                    }
-                    Toast.makeText(ShowMiddleActivity.this, "صوت متوقف شد", Toast.LENGTH_SHORT).show();
-                    playBtn.setBackgroundResource(R.mipmap.play_icon);
+        playBtn.setOnClickListener(view -> {
+            if (medPlayer != null && !medPlayer.isPlaying()) {
+                SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
+                float speed = sp.getFloat("speed", 1.0f);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    medPlayer.setPlaybackParams(medPlayer.getPlaybackParams().setSpeed(speed));
                 }
+                medPlayer.start();
+                Toast.makeText(ShowMiddleActivity.this, "صوت در حال پخش", Toast.LENGTH_SHORT).show();
+                playBtn.setBackgroundResource(R.mipmap.pause);
+
+                mHandler.post(updateSeekBar);
+            } else if (medPlayer != null) {
+                medPlayer.pause();
+                Toast.makeText(ShowMiddleActivity.this, "صوت متوقف شد", Toast.LENGTH_SHORT).show();
+                playBtn.setBackgroundResource(R.mipmap.play_icon);
+                mHandler.removeCallbacks(updateSeekBar); // توقف به‌روزرسانی SeekBar
             }
         });
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -214,9 +179,30 @@ public class ShowMiddleActivity extends BaseActivity {
                 }
             }
         });
-
     }
+    private Runnable updateSeekBar = new Runnable() {
+        @Override
+        public void run() {
+            if (medPlayer != null && medPlayer.isPlaying()) {
+                int currentPosition = medPlayer.getCurrentPosition() / 1000;
+                seekBar.setProgress(currentPosition);
 
+                String time = String.format("%02d:%02d",
+                        TimeUnit.MILLISECONDS.toMinutes(mFileDuration),
+                        TimeUnit.MILLISECONDS.toSeconds(mFileDuration) -
+                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(mFileDuration))
+                );
+                String time2 = String.format("%02d:%02d",
+                        TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()),
+                        TimeUnit.MILLISECONDS.toSeconds(medPlayer.getCurrentPosition()) -
+                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()))
+                );
+                timeTxt.setText(time2 + "/" + time);
+
+                mHandler.postDelayed(this, 1000);
+            }
+        }
+    };
     private void getData(boolean filter, boolean switching) {
         SettingsBll settingsBll = new SettingsBll(this);
         settingsBll.setMode(false);
