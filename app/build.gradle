@@ -5,7 +5,7 @@ android {
     buildToolsVersion "34.0.0"
     defaultConfig {
         applicationId "com.jamali.esteghfar70"
-        minSdkVersion 17
+        minSdkVersion 19
         targetSdkVersion 34
         versionCode 8
         versionName "1.1.0"
@@ -68,4 +68,6 @@ dependencies {
 
 //    implementation 'com.infstory:proguard-snippets:1.0.0'
     implementation 'com.github.yongjhih.android-proguards:android-proguards-all:-SNAPSHOT'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.activity:activity:1.9.3'
 }

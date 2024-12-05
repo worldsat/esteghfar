@@ -55,7 +55,7 @@ public class SplashActivity extends AppCompatActivity {
                         Intent intent = new Intent(SplashActivity.this, ShowMiddleActivity.class);
                         startActivity(intent);
 
-                    }, 3000);
+                    }, 2000);
 //
                 });
                 runOnUiThread(() -> {

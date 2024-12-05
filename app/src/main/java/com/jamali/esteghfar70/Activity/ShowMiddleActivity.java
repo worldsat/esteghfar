@@ -1,5 +1,6 @@
 package com.jamali.esteghfar70.Activity;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
@@ -47,6 +48,11 @@ public class ShowMiddleActivity extends BaseActivity {
     private int mFileDuration;
     private boolean translate = true;
 
+    // متغیرهای مربوط به موقعیت ذخیره‌شده
+    private static final String PREF_NAME = "RecyclerViewPrefs";
+    private static final String KEY_SAVED_POSITION = "saved_position";
+    private int savedPosition = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +60,14 @@ public class ShowMiddleActivity extends BaseActivity {
         getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         initview();
 
+        // بازیابی موقعیت ذخیره‌شده
+        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        savedPosition = prefs.getInt(KEY_SAVED_POSITION, -1);
+
+        if (savedPosition != -1) {
+            // نمایش دیالوگ به کاربر
+            showResumeDialog();
+        }
 
         translator();
         getData(false, false);
@@ -74,7 +88,7 @@ public class ShowMiddleActivity extends BaseActivity {
                         medPlayer.stop();
                         playBtn.setBackgroundResource(R.mipmap.pause);
                     }
-                    medPlayer = MediaPlayer.create(ShowMiddleActivity.this, R.raw.full);
+                    medPlayer = MediaPlayer.create(ShowMiddleActivity.this, R.raw.full2);
                     timing();
                     setup();
                     translate = true;
@@ -96,81 +110,146 @@ public class ShowMiddleActivity extends BaseActivity {
             }
         });
     }
-
+    private void showResumeDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("ادامه نمایش")
+                .setMessage("آیا مایلید از ادامه آخرین ردیف مشاهده شده، نمایش را ادامه دهید؟")
+                .setPositiveButton("بله", (dialog, which) -> {
+                    // پیمایش به موقعیت ذخیره شده
+                    recyclerView.scrollToPosition(savedPosition);
+                })
+                .setNegativeButton("خیر", (dialog, which) -> {
+                    // پاک کردن موقعیت ذخیره شده در صورت عدم تمایل کاربر
+                    clearSavedPosition();
+                })
+                .show();
+    }
     private void timing() {
         this.mFileDuration = this.medPlayer.getDuration();
         this.seekBar.setMax(this.mFileDuration / 1000);
     }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (medPlayer != null) {
-            medPlayer.pause();
-            playBtn.setBackgroundResource(R.mipmap.play_icon);
-            mHandler.removeCallbacks(updateSeekBar); // توقف به‌روزرسانی SeekBar هنگام مکث
-        }
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (medPlayer != null) {
-            medPlayer.release(); // تخریب MediaPlayer هنگام نابودی اکتیویتی
+            medPlayer.release();
             medPlayer = null;
-            mHandler.removeCallbacks(updateSeekBar); // توقف Handler هنگام نابودی اکتیویتی
+//            mHandler.removeCallbacks(updateSeekBar);
+        }
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (recyclerView != null) {
+            // ذخیره موقعیت فعلی
+            LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+            int currentPosition = layoutManager.findLastVisibleItemPosition();
+            savePosition(currentPosition);
+        }
+
+        if (medPlayer != null) {
+            medPlayer.pause();
+            playBtn.setBackgroundResource(R.mipmap.play_icon);
+//            mHandler.removeCallbacks(updateSeekBar);
         }
     }
 
-    private void setup() {
-        if (medPlayer != null) {
-            mFileDuration = medPlayer.getDuration();
-            seekBar.setMax(mFileDuration / 1000);
 
-            String time = String.format("%02d:%02d",
-                    TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
-                    TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) -
-                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()))
-            );
-            timeTxt.setText("00:00/" + time);
-        }
+    private void setup() {
+        seekBar.setMax(mFileDuration / 1000);
+        String time = String.format("%02d:%02d",
+                TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
+                TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()))
+        );
+
+        timeTxt.setText("00:00/" + time);
     }
 
     private void media() {
         ScrollToPosition scrollToPosition = new ScrollToPosition(recyclerView, response, adapter);
-        seekBar.setRotation(180);
 
+        seekBar.setRotation(180);
         if (medPlayer == null) {
-            medPlayer = MediaPlayer.create(this, R.raw.full);
+            medPlayer = MediaPlayer.create(this, R.raw.full2);
         }
         setup();
+//        medPlayer.setLooping(true);
+        playBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!medPlayer.isPlaying()) {
+//                    medPlayer.start();
+                    SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
+                    float speed = sp.getFloat("speed", 1.0f);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        medPlayer.setPlaybackParams(medPlayer.getPlaybackParams().setSpeed(speed));
+                    }
+                    medPlayer.start();
+                    Toast.makeText(ShowMiddleActivity.this, "صوت در حال پخش", Toast.LENGTH_SHORT).show();
+                    playBtn.setBackgroundResource(R.mipmap.pause);
 
-        playBtn.setOnClickListener(view -> {
-            if (medPlayer != null && !medPlayer.isPlaying()) {
-                SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
-                float speed = sp.getFloat("speed", 1.0f);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    medPlayer.setPlaybackParams(medPlayer.getPlaybackParams().setSpeed(speed));
+
+                    //Make sure you update Seekbar on UI thread
+                    ShowMiddleActivity.this.runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            if (medPlayer != null && medPlayer.isPlaying()) {
+
+                                int mCurrentPosition = medPlayer.getCurrentPosition() / 1000;
+                                Log.i(TAG, "run: " + mCurrentPosition);
+                                seekBar.setProgress(mCurrentPosition);
+
+                                if (sp.getBoolean("scrollToPosition", true)) {
+                                    if (!translate) {
+                                        scrollToPosition.GoTo(scrollToPosition.getPosFromSound(mCurrentPosition));
+                                    }
+                                }
+                            }
+//                            mHandler.postDelayed(this, 1000);
+
+                            String time = String.format("%02d:%02d",
+                                    TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
+                                    TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) -
+                                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()))
+                            );
+                            String time2 = String.format("%02d:%02d",
+                                    TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()),
+                                    TimeUnit.MILLISECONDS.toSeconds(medPlayer.getCurrentPosition()) -
+                                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()))
+                            );
+
+                            timeTxt.setText(time2 + "/" + time);
+
+                            // Running this thread after 100 milliseconds
+                            mHandler.postDelayed(this, 100);
+
+                        }
+                    });
+                } else {
+                    medPlayer.pause();
+//                    if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
+//
+//                        medPlayer.reset();
+//
+//                    }
+                    Toast.makeText(ShowMiddleActivity.this, "صوت متوقف شد", Toast.LENGTH_SHORT).show();
+                    playBtn.setBackgroundResource(R.mipmap.play_icon);
                 }
-                medPlayer.start();
-                Toast.makeText(ShowMiddleActivity.this, "صوت در حال پخش", Toast.LENGTH_SHORT).show();
-                playBtn.setBackgroundResource(R.mipmap.pause);
-
-                mHandler.post(updateSeekBar);
-            } else if (medPlayer != null) {
-                medPlayer.pause();
-                Toast.makeText(ShowMiddleActivity.this, "صوت متوقف شد", Toast.LENGTH_SHORT).show();
-                playBtn.setBackgroundResource(R.mipmap.play_icon);
-                mHandler.removeCallbacks(updateSeekBar); // توقف به‌روزرسانی SeekBar
             }
         });
-
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -179,30 +258,9 @@ public class ShowMiddleActivity extends BaseActivity {
                 }
             }
         });
+
     }
-    private Runnable updateSeekBar = new Runnable() {
-        @Override
-        public void run() {
-            if (medPlayer != null && medPlayer.isPlaying()) {
-                int currentPosition = medPlayer.getCurrentPosition() / 1000;
-                seekBar.setProgress(currentPosition);
 
-                String time = String.format("%02d:%02d",
-                        TimeUnit.MILLISECONDS.toMinutes(mFileDuration),
-                        TimeUnit.MILLISECONDS.toSeconds(mFileDuration) -
-                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(mFileDuration))
-                );
-                String time2 = String.format("%02d:%02d",
-                        TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()),
-                        TimeUnit.MILLISECONDS.toSeconds(medPlayer.getCurrentPosition()) -
-                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()))
-                );
-                timeTxt.setText(time2 + "/" + time);
-
-                mHandler.postDelayed(this, 1000);
-            }
-        }
-    };
     private void getData(boolean filter, boolean switching) {
         SettingsBll settingsBll = new SettingsBll(this);
         settingsBll.setMode(false);
@@ -251,6 +309,18 @@ public class ShowMiddleActivity extends BaseActivity {
         switch1 = findViewById(R.id.switch1);
         SettingBtn = findViewById(R.id.settingsBtn);
     }
+    private void savePosition(int position) {
+        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(KEY_SAVED_POSITION, position);
+        editor.apply();
+    }
 
+    private void clearSavedPosition() {
+        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.remove(KEY_SAVED_POSITION);
+        editor.apply();
+    }
 
 }
