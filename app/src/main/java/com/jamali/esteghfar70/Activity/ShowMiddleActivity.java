@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -37,278 +36,150 @@ public class ShowMiddleActivity extends BaseActivity {
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private ArrayList<ShowList> response = new ArrayList<>();
-    private int position, List;
     private MediaPlayer medPlayer;
     private Button playBtn;
     private TextView timeTxt;
     private SeekBar seekBar;
     private Switch switch1;
-    private ImageView SettingBtn;
+    private ImageView settingBtn;
     private Handler mHandler = new Handler();
-    private int mFileDuration;
+    private Runnable updateSeekBar;
+    private int savedPosition = -1;
     private boolean translate = true;
 
-    // متغیرهای مربوط به موقعیت ذخیره‌شده
     private static final String PREF_NAME = "RecyclerViewPrefs";
     private static final String KEY_SAVED_POSITION = "saved_position";
-    private int savedPosition = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_middle);
         getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-        initview();
 
-        // بازیابی موقعیت ذخیره‌شده
-        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        savedPosition = prefs.getInt(KEY_SAVED_POSITION, -1);
-
-        if (savedPosition != -1) {
-            // نمایش دیالوگ به کاربر
-            showResumeDialog();
-        }
-
+        initView();
+        setupMediaPlayer();
+        restoreSavedPosition();
         translator();
         getData(false, false);
-        setVariable();
+        setupSettingsButton();
     }
 
-    private void setVariable() {
-        SettingBtn.setOnClickListener(view -> startActivity(new Intent(ShowMiddleActivity.this, SettingsActivity.class)));
-    }
-
-    private void translator() {
-        switch1.setOnCheckedChangeListener((compoundButton, b) -> {
-            if (b) {
-                getData(false, true);
-
-                if (medPlayer != null) {
-                    if (medPlayer.isPlaying()) {
-                        medPlayer.stop();
-                        playBtn.setBackgroundResource(R.mipmap.pause);
-                    }
-                    medPlayer = MediaPlayer.create(ShowMiddleActivity.this, R.raw.full2);
-                    timing();
-                    setup();
-                    translate = true;
-                }
-
-            } else {
-                getData(true, false);
-
-                if (medPlayer != null) {
-                    if (medPlayer.isPlaying()) {
-                        medPlayer.stop();
-                        playBtn.setBackgroundResource(R.mipmap.play_icon);
-                    }
-                    medPlayer = MediaPlayer.create(ShowMiddleActivity.this, R.raw.without_translate);
-                    setup();
-                    timing();
-                    translate = false;
-                }
-            }
-        });
-    }
-    private void showResumeDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("ادامه نمایش")
-                .setMessage("آیا مایلید از ادامه آخرین ردیف مشاهده شده، نمایش را ادامه دهید؟")
-                .setPositiveButton("بله", (dialog, which) -> {
-                    // پیمایش به موقعیت ذخیره شده
-                    recyclerView.scrollToPosition(savedPosition);
-                })
-                .setNegativeButton("خیر", (dialog, which) -> {
-                    // پاک کردن موقعیت ذخیره شده در صورت عدم تمایل کاربر
-                    clearSavedPosition();
-                })
-                .show();
-    }
-    private void timing() {
-        this.mFileDuration = this.medPlayer.getDuration();
-        this.seekBar.setMax(this.mFileDuration / 1000);
-    }
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (medPlayer != null) {
-            medPlayer.release();
-            medPlayer = null;
-//            mHandler.removeCallbacks(updateSeekBar);
-        }
-    }
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (recyclerView != null) {
-            // ذخیره موقعیت فعلی
-            LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-            int currentPosition = layoutManager.findLastVisibleItemPosition();
-            savePosition(currentPosition);
-        }
-
-        if (medPlayer != null) {
-            medPlayer.pause();
-            playBtn.setBackgroundResource(R.mipmap.play_icon);
-//            mHandler.removeCallbacks(updateSeekBar);
-        }
-    }
-
-
-    private void setup() {
-        seekBar.setMax(mFileDuration / 1000);
-        String time = String.format("%02d:%02d",
-                TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
-                TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()))
-        );
-
-        timeTxt.setText("00:00/" + time);
-    }
-
-    private void media() {
-        ScrollToPosition scrollToPosition = new ScrollToPosition(recyclerView, response, adapter);
-
-        seekBar.setRotation(180);
-        if (medPlayer == null) {
-            medPlayer = MediaPlayer.create(this, R.raw.full2);
-        }
-        setup();
-//        medPlayer.setLooping(true);
-        playBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!medPlayer.isPlaying()) {
-//                    medPlayer.start();
-                    SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
-                    float speed = sp.getFloat("speed", 1.0f);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        medPlayer.setPlaybackParams(medPlayer.getPlaybackParams().setSpeed(speed));
-                    }
-                    medPlayer.start();
-                    Toast.makeText(ShowMiddleActivity.this, "صوت در حال پخش", Toast.LENGTH_SHORT).show();
-                    playBtn.setBackgroundResource(R.mipmap.pause);
-
-
-                    //Make sure you update Seekbar on UI thread
-                    ShowMiddleActivity.this.runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            if (medPlayer != null && medPlayer.isPlaying()) {
-
-                                int mCurrentPosition = medPlayer.getCurrentPosition() / 1000;
-                                Log.i(TAG, "run: " + mCurrentPosition);
-                                seekBar.setProgress(mCurrentPosition);
-
-                                if (sp.getBoolean("scrollToPosition", true)) {
-                                    if (!translate) {
-                                        scrollToPosition.GoTo(scrollToPosition.getPosFromSound(mCurrentPosition));
-                                    }
-                                }
-                            }
-//                            mHandler.postDelayed(this, 1000);
-
-                            String time = String.format("%02d:%02d",
-                                    TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
-                                    TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) -
-                                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()))
-                            );
-                            String time2 = String.format("%02d:%02d",
-                                    TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()),
-                                    TimeUnit.MILLISECONDS.toSeconds(medPlayer.getCurrentPosition()) -
-                                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()))
-                            );
-
-                            timeTxt.setText(time2 + "/" + time);
-
-                            // Running this thread after 100 milliseconds
-                            mHandler.postDelayed(this, 100);
-
-                        }
-                    });
-                } else {
-                    medPlayer.pause();
-//                    if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
-//
-//                        medPlayer.reset();
-//
-//                    }
-                    Toast.makeText(ShowMiddleActivity.this, "صوت متوقف شد", Toast.LENGTH_SHORT).show();
-                    playBtn.setBackgroundResource(R.mipmap.play_icon);
-                }
-            }
-        });
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (medPlayer != null && fromUser) {
-                    medPlayer.seekTo(progress * 1000);
-                }
-            }
-        });
-
-    }
-
-    private void getData(boolean filter, boolean switching) {
-        SettingsBll settingsBll = new SettingsBll(this);
-        settingsBll.setMode(false);
-        position = getIntent().getIntExtra("Position", 0);
-        List = getIntent().getIntExtra("List", 0);
-        ArrayList<Filter> filters = new ArrayList<Filter>();
-        if (filter) {
-            filters.add(new Filter("Kind", "text"));
-        }
-        controller().Get(ShowList.class, filters, 1, 1, true, new CallbackGet() {
-            @Override
-            public <T> void onSuccess(ArrayList<T> result, int count) {
-//                Toast.makeText(ShowMiddleActivity.this, result.toString(), Toast.LENGTH_SHORT).show();
-                Log.i(TAG, "onSuccess: " + result);
-                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ShowMiddleActivity.this);
-                recyclerView.setLayoutManager(linearLayoutManager);
-                response.clear();
-                response.addAll((Collection<? extends ShowList>) result);
-                for (int i = 0; i < response.size(); i++) {
-                    response.get(i).setSeleccted("0");
-                }
-                if (switching) {
-                    adapter.notifyDataSetChanged();
-                    return;
-                }
-                adapter = new ShowItemListAdapter(response);
-
-                recyclerView.setAdapter(adapter);
-                media();
-                timing();
-            }
-
-            @Override
-            public void onError(String error) {
-
-            }
-        });
-
-    }
-
-    private void initview() {
+    private void initView() {
         recyclerView = findViewById(R.id.view);
         playBtn = findViewById(R.id.playBtn);
         timeTxt = findViewById(R.id.timeTxt);
         seekBar = findViewById(R.id.seekBar);
         switch1 = findViewById(R.id.switch1);
-        SettingBtn = findViewById(R.id.settingsBtn);
+        settingBtn = findViewById(R.id.settingsBtn);
     }
+
+    private void restoreSavedPosition() {
+        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        savedPosition = prefs.getInt(KEY_SAVED_POSITION, -1);
+        if (savedPosition != -1) {
+            new AlertDialog.Builder(this)
+                    .setTitle("ادامه نمایش")
+                    .setMessage("آیا مایلید از ادامه آخرین ردیف مشاهده شده، نمایش را ادامه دهید؟")
+                    .setPositiveButton("بله", (dialog, which) -> recyclerView.scrollToPosition(savedPosition))
+                    .setNegativeButton("خیر", (dialog, which) -> clearSavedPosition())
+                    .show();
+        }
+    }
+
+    private void translator() {
+        switch1.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+            translate = isChecked; // تنظیم مقدار translate
+            int audioResource = isChecked ? R.raw.full2 : R.raw.without_translate;
+            if (medPlayer != null) {
+                medPlayer.stop();
+                medPlayer.release();
+                medPlayer = null;
+            }
+            medPlayer = MediaPlayer.create(this, audioResource);
+            setupMediaPlayer();
+            getData(!isChecked, isChecked); // بروزرسانی لیست بر اساس وضعیت
+        });
+    }
+
+    private void setupMediaPlayer() {
+        int initialAudioResource = translate ? R.raw.full2 : R.raw.without_translate;
+
+        if (medPlayer != null) {
+            medPlayer.release();
+            medPlayer = null;
+        }
+
+        medPlayer = MediaPlayer.create(this, initialAudioResource); // مقداردهی اولیه
+        seekBar.setMax(medPlayer.getDuration() / 1000);
+
+        // محاسبه زمان کل صوت
+        String totalTime = String.format("%02d:%02d",
+                TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
+                TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) % 60);
+
+        // مقداردهی اولیه timeTxt
+        timeTxt.setText("00:00/" + totalTime);
+
+        medPlayer.setOnCompletionListener(mp -> playBtn.setBackgroundResource(R.mipmap.play_icon));
+
+        playBtn.setOnClickListener(view -> {
+            if (medPlayer.isPlaying()) {
+                medPlayer.pause();
+                playBtn.setBackgroundResource(R.mipmap.play_icon);
+            } else {
+                medPlayer.start();
+                playBtn.setBackgroundResource(R.mipmap.pause);
+                startSeekBarUpdate();
+            }
+        });
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && medPlayer != null) {
+                    medPlayer.seekTo(progress * 1000);
+                }
+            }
+        });
+
+        updateSeekBar = new Runnable() {
+            @Override
+            public void run() {
+                if (medPlayer != null && medPlayer.isPlaying()) {
+                    int currentPos = medPlayer.getCurrentPosition() / 1000;
+                    seekBar.setProgress(currentPos);
+
+                    String time = String.format("%02d:%02d",
+                            TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()),
+                            TimeUnit.MILLISECONDS.toSeconds(medPlayer.getCurrentPosition()) % 60);
+
+                    timeTxt.setText(time + "/" + totalTime); // به‌روزرسانی مقدار زمان
+                    mHandler.postDelayed(this, 1000);
+                }
+            }
+        };
+    }
+
+
+
+    private void startSeekBarUpdate() {
+        mHandler.post(updateSeekBar);
+    }
+
+    private void stopSeekBarUpdate() {
+        mHandler.removeCallbacks(updateSeekBar);
+    }
+
+    private void setupSettingsButton() {
+        settingBtn.setOnClickListener(view -> startActivity(new Intent(this, SettingsActivity.class)));
+    }
+
     private void savePosition(int position) {
         SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
@@ -318,9 +189,59 @@ public class ShowMiddleActivity extends BaseActivity {
 
     private void clearSavedPosition() {
         SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.remove(KEY_SAVED_POSITION);
-        editor.apply();
+        prefs.edit().remove(KEY_SAVED_POSITION).apply();
     }
 
+    private void getData(boolean filter, boolean switching) {
+        SettingsBll settingsBll = new SettingsBll(this);
+        settingsBll.setMode(false);
+        ArrayList<Filter> filters = new ArrayList<>();
+        if (filter) {
+            filters.add(new Filter("Kind", "text"));
+        }
+        controller().Get(ShowList.class, filters, 1, 1, true, new CallbackGet() {
+            @Override
+            public <T> void onSuccess(ArrayList<T> result, int count) {
+                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ShowMiddleActivity.this);
+                recyclerView.setLayoutManager(linearLayoutManager);
+                response.clear();
+                response.addAll((Collection<? extends ShowList>) result);
+                for (ShowList item : response) {
+                    item.setSeleccted("0");
+                }
+                if (switching) {
+                    adapter.notifyDataSetChanged();
+                    return;
+                }
+                adapter = new ShowItemListAdapter(response);
+                recyclerView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(ShowMiddleActivity.this, "خطا در دریافت داده‌ها", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (recyclerView != null) {
+            LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+            savePosition(layoutManager.findLastVisibleItemPosition());
+        }
+        if (medPlayer != null) medPlayer.pause();
+        stopSeekBarUpdate();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (medPlayer != null) {
+            medPlayer.release();
+            medPlayer = null;
+        }
+        stopSeekBarUpdate();
+    }
 }
