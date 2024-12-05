@@ -7,6 +7,7 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -46,7 +47,7 @@ public class ShowMiddleActivity extends BaseActivity {
     private Runnable updateSeekBar;
     private int savedPosition = -1;
     private boolean translate = true;
-
+    boolean doubleBackToExitPressedOnce = false;
     private static final String PREF_NAME = "RecyclerViewPrefs";
     private static final String KEY_SAVED_POSITION = "saved_position";
 
@@ -100,7 +101,6 @@ public class ShowMiddleActivity extends BaseActivity {
             getData(!isChecked, isChecked); // بروزرسانی لیست بر اساس وضعیت
         });
     }
-
     private void setupMediaPlayer() {
         int initialAudioResource = translate ? R.raw.full2 : R.raw.without_translate;
 
@@ -122,31 +122,66 @@ public class ShowMiddleActivity extends BaseActivity {
 
         medPlayer.setOnCompletionListener(mp -> playBtn.setBackgroundResource(R.mipmap.play_icon));
 
+        // بازگرداندن ScrollToPosition
+        ScrollToPosition scrollToPosition = new ScrollToPosition(recyclerView, response, adapter);
+
         playBtn.setOnClickListener(view -> {
             if (medPlayer.isPlaying()) {
                 medPlayer.pause();
-                playBtn.setBackgroundResource(R.mipmap.play_icon);
+                playBtn.setBackgroundResource(R.mipmap.play_icon); // تغییر آیکون به Play
             } else {
+                SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
+                float speed = sp.getFloat("speed", 1.0f); // تنظیم سرعت
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    medPlayer.setPlaybackParams(medPlayer.getPlaybackParams().setSpeed(speed));
+                }
                 medPlayer.start();
-                playBtn.setBackgroundResource(R.mipmap.pause);
+                playBtn.setBackgroundResource(R.mipmap.pause); // تغییر آیکون به Pause
                 startSeekBarUpdate();
             }
         });
 
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // پخش صدا در هنگام جابه‌جایی موقتاً متوقف می‌شود
+                if (medPlayer != null && medPlayer.isPlaying()) {
+                    medPlayer.pause();
+                    playBtn.setBackgroundResource(R.mipmap.play_icon); // به‌روزرسانی آیکون
+                }
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // فقط موقعیت صدا تغییر می‌کند، پخش خودکار انجام نمی‌شود
+                if (medPlayer != null) {
+                    medPlayer.seekTo(seekBar.getProgress() * 1000);
+                }
+            }
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser && medPlayer != null) {
                     medPlayer.seekTo(progress * 1000);
+
+                    // محاسبه زمان جدید
+                    String currentTime = String.format("%02d:%02d",
+                            TimeUnit.SECONDS.toMinutes(progress),
+                            progress % 60);
+
+                    String totalTime = String.format("%02d:%02d",
+                            TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
+                            TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) % 60);
+
+                    // به‌روزرسانی textView
+                    timeTxt.setText(currentTime + "/" + totalTime);
                 }
             }
         });
+
+
 
         updateSeekBar = new Runnable() {
             @Override
@@ -154,6 +189,14 @@ public class ShowMiddleActivity extends BaseActivity {
                 if (medPlayer != null && medPlayer.isPlaying()) {
                     int currentPos = medPlayer.getCurrentPosition() / 1000;
                     seekBar.setProgress(currentPos);
+
+                    // به‌روزرسانی ScrollToPosition
+                    SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
+                    if (sp.getBoolean("scrollToPosition", true)) {
+                        if (!translate) {
+                            scrollToPosition.GoTo(scrollToPosition.getPosFromSound(currentPos));
+                        }
+                    }
 
                     String time = String.format("%02d:%02d",
                             TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()),
@@ -165,6 +208,7 @@ public class ShowMiddleActivity extends BaseActivity {
             }
         };
     }
+
 
 
 
@@ -243,5 +287,25 @@ public class ShowMiddleActivity extends BaseActivity {
             medPlayer = null;
         }
         stopSeekBarUpdate();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            finishAffinity();
+            System.exit(0);
+
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "جهت خروج از برنامه، دوباره دکمه برگشت را فشار دهید", Toast.LENGTH_SHORT).show();
+
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
     }
 }

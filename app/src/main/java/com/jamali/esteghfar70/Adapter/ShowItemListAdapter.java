@@ -107,11 +107,11 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 notifyDataSetChanged();
             }
         });
-//        if (array_object.get(position).getSeleccted().equals("0")) {
-//            holder.Linear.setBackgroundColor(Color.parseColor("#00ffffff"));
-//        } else {
-//            holder.Linear.setBackgroundColor(Color.parseColor("#78A4FD7A"));
-//        }
+        if (array_object.get(position).getSeleccted().equals("0")) {
+            holder.Linear.setBackgroundColor(Color.parseColor("#00ffffff"));
+        } else {
+            holder.Linear.setBackgroundColor(Color.parseColor("#78A4FD7A"));
+        }
 
 
 //        if (row_index == position) {
