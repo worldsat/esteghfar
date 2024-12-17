@@ -8,6 +8,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.jamali.esteghfar70.Domain.ShowList;
@@ -100,6 +101,12 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private void initText(TextViewHolder holder, int position) {
 
         holder.title.setText(array_object.get(position).getSubject());
+        if(array_object.get(position).getCategory()==null || array_object.get(position).getCategory().equals("null")){
+            holder.catLayout.setVisibility(View.GONE);
+        }else{
+            holder.catLayout.setVisibility(View.VISIBLE);
+        }
+        holder.category.setText("بند "+array_object.get(position).getCategory());
         holder.Linear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -183,13 +190,15 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
 
     class TextViewHolder extends RecyclerView.ViewHolder {
-        TextView title;
+        TextView title,category;
         LinearLayout Linear;
-
+ConstraintLayout catLayout;
         private TextViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.title);
+            category = itemView.findViewById(R.id.categoryTxt);
             Linear = itemView.findViewById(R.id.Linear);
+            catLayout = itemView.findViewById(R.id.CatLayout);
         }
     }
 
