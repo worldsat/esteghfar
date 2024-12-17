@@ -49,6 +49,9 @@
             android:name=".Activity.ShowMiddleActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".Activity.ShowMiddleActivity2"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".Activity.MainActivity"
             android:screenOrientation="portrait" />
     </application>

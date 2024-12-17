@@ -90,7 +90,7 @@ public class ShowMiddleActivity extends BaseActivity {
     private void translator() {
         switch1.setOnCheckedChangeListener((compoundButton, isChecked) -> {
             translate = isChecked; // تنظیم مقدار translate
-            int audioResource = isChecked ? R.raw.full2 : R.raw.without_translate;
+            int audioResource = isChecked ? R.raw.aac_full4 : R.raw.without_translate;
             if (medPlayer != null) {
                 medPlayer.stop();
                 medPlayer.release();
@@ -102,7 +102,7 @@ public class ShowMiddleActivity extends BaseActivity {
         });
     }
     private void setupMediaPlayer() {
-        int initialAudioResource = translate ? R.raw.full2 : R.raw.without_translate;
+        int initialAudioResource = translate ? R.raw.aac_full4 : R.raw.without_translate;
 
         if (medPlayer != null) {
             medPlayer.release();
