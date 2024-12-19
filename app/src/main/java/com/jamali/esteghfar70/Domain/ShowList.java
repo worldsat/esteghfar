@@ -8,9 +8,18 @@ public class ShowList extends BaseDomain {
     private String Kind;
     private String seleccted;
     private String Category;
+    private float Size;
 
     public ShowList() {
         setTableName("1_1");
+    }
+
+    public float getSize() {
+        return Size;
+    }
+
+    public void setSize(float size) {
+        Size = size;
     }
 
     public String getCategory() {

@@ -1,6 +1,10 @@
 package com.jamali.esteghfar70.Adapter;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,25 +23,28 @@ import java.util.ArrayList;
 public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final ArrayList<ShowList> array_object;
     private int position;
-    private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            row_index = position;
-            notifyDataSetChanged();
-        }
-    };
+    private CallbackClicked callbackClicked;
+    private Context context;
+//    private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
+//        @Override
+//        public void onClick(View view) {
+//            row_index = position;
+//            notifyDataSetChanged();
+//            callbackClicked.onClick(position);
+//        }
+//    };
     private static final int TEXT = 0;
     private static final int SUBJECT = 1;
     private static final int ROW = 2;
     private static final int ROW2 = 3;
     private static final int SUBJECT_SUB = 4;
-    private static final int ROW_SUB = 5;
-    private static final int WARNING = 6;
+
     private int row_index = -1;
 
-    public ShowItemListAdapter(ArrayList<ShowList> result) {
+    public ShowItemListAdapter(ArrayList<ShowList> result, CallbackClicked callbackClicked) {
 
         this.array_object = result;
+        this.callbackClicked = callbackClicked;
 
     }
 
@@ -46,10 +53,10 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
-
+        context = parent.getContext();
         if (viewType == TEXT) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_text, parent, false);
-            view.setOnClickListener(mOnClickListener);
+//            view.setOnClickListener(mOnClickListener);
             return new TextViewHolder(view);
         } else if (viewType == SUBJECT) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder, parent, false);
@@ -63,12 +70,6 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         } else if (viewType == SUBJECT_SUB) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder, parent, false);
             return new SubjectSubViewHolder(view);
-        } else if (viewType == ROW_SUB) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_row, parent, false);
-            return new RowSubViewHolder(view);
-        } else if (viewType == WARNING) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_warning, parent, false);
-            return new WarningViewHolder(view);
         } else {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_text, parent, false);
             return new TextViewHolder(view);
@@ -89,10 +90,6 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             initRow2((Row2ViewHolder) holder, position);
         } else if (holder instanceof SubjectSubViewHolder) {
             initSubjectSub((SubjectSubViewHolder) holder, position);
-        } else if (holder instanceof RowSubViewHolder) {
-            initRowSub((RowSubViewHolder) holder, position);
-        } else if (holder instanceof WarningViewHolder) {
-            initWarning((WarningViewHolder) holder, position);
         }
 
 
@@ -100,18 +97,20 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private void initText(TextViewHolder holder, int position) {
 
-        holder.title.setText(array_object.get(position).getSubject());
-        if(array_object.get(position).getCategory()==null || array_object.get(position).getCategory().equals("null")){
+        holder.title.setText((array_object.get(position).getSubject()));
+        holder.title.setTextSize(array_object.get(position).getSize());
+        if (array_object.get(position).getCategory() == null || array_object.get(position).getCategory().equals("null")) {
             holder.catLayout.setVisibility(View.GONE);
-        }else{
+        } else {
             holder.catLayout.setVisibility(View.VISIBLE);
         }
-        holder.category.setText("بند "+array_object.get(position).getCategory());
+        holder.category.setText("بند " + array_object.get(position).getCategory());
         holder.Linear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 row_index = position;
                 notifyDataSetChanged();
+                callbackClicked.onClick(position);
             }
         });
         if (array_object.get(position).getSeleccted().equals("0")) {
@@ -137,6 +136,7 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private void initRow(RowViewHolder holder, int position) {
         holder.title.setText(array_object.get(position).getSubject());
+        holder.title.setTextSize(array_object.get(position).getSize());
     }
 
     private void initRow2(Row2ViewHolder holder, int position) {
@@ -147,13 +147,6 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         holder.title.setText(array_object.get(position).getSubject());
     }
 
-    private void initRowSub(RowSubViewHolder holder, int position) {
-        holder.title.setText(array_object.get(position).getSubject());
-    }
-
-    private void initWarning(WarningViewHolder holder, int position) {
-        holder.title.setText(array_object.get(position).getSubject());
-    }
 
     @Override
     public int getItemCount() {
@@ -178,10 +171,6 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             return ROW2;
         } else if (array_object.get(position).getKind().equals("subject_sub")) {
             return SUBJECT_SUB;
-        } else if (array_object.get(position).getKind().equals("row_sub")) {
-            return ROW_SUB;
-        } else if (array_object.get(position).getKind().equals("warning")) {
-            return WARNING;
         } else {
             return TEXT;
         }
@@ -190,9 +179,10 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
 
     class TextViewHolder extends RecyclerView.ViewHolder {
-        TextView title,category;
+        TextView title, category;
         LinearLayout Linear;
-ConstraintLayout catLayout;
+        ConstraintLayout catLayout;
+
         private TextViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.title);
@@ -238,21 +228,31 @@ ConstraintLayout catLayout;
         }
     }
 
-    class RowSubViewHolder extends RecyclerView.ViewHolder {
-        TextView title;
 
-        private RowSubViewHolder(View itemView) {
-            super(itemView);
-            title = itemView.findViewById(R.id.title);
+    private SpannableString getColoredArabicText(String text) {
+        SpannableString spannable = new SpannableString(text);
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            // بررسی کنید که آیا کاراکتر اعراب (حرکت) است یا نه
+            if (isArabicDiacritic(c)) {
+                spannable.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.red_900)), i, i + 1,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            }
         }
+        return spannable;
     }
 
-    class WarningViewHolder extends RecyclerView.ViewHolder {
-        TextView title;
 
-        private WarningViewHolder(View itemView) {
-            super(itemView);
-            title = itemView.findViewById(R.id.title);
-        }
+    // بررسی اینکه کاراکتر جزء اعراب (حرکات) است یا خیر
+    private boolean isArabicDiacritic(char c) {
+        // محدوده کد یونیکد برای اعراب عربی: U+0610 تا U+061A و U+064B تا U+065F
+        return (c >= 0x0610 && c <= 0x061A) || (c >= 0x064B && c <= 0x065F);
+    }
+
+    public interface CallbackClicked {
+
+        public void onClick(int pos);
+
     }
 }

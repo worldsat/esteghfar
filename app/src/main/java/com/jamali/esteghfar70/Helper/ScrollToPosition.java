@@ -1,15 +1,12 @@
 package com.jamali.esteghfar70.Helper;
 
-import android.os.Handler;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.jamali.esteghfar70.Domain.ShowList;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class ScrollToPosition {
     private RecyclerView recyclerView;
@@ -17,26 +14,28 @@ public class ScrollToPosition {
     private RecyclerView.Adapter adapter;
     private int currentPos = -1;
     int i = 0;
-
-    public ScrollToPosition(RecyclerView recyclerView, ArrayList<ShowList> response, RecyclerView.Adapter adapter) {
+private CallbackChanged callbackChanged;
+    public ScrollToPosition(RecyclerView recyclerView, ArrayList<ShowList> response, CallbackChanged callbackChanged) {
         this.recyclerView = recyclerView;
         this.response = response;
         this.adapter = adapter;
+        this.callbackChanged = callbackChanged;
     }
 
     public void GoTo(int position) {
-        int pos = i;
-        if (currentPos != pos) {
-            recyclerView.scrollToPosition(pos);
+        if (currentPos != position) {
+
             for (int j = 0; j < response.size(); j++) {
-                if (j != pos) {
+                if (j != position) {
                     response.get(j).setSeleccted("0");
                 } else {
                     response.get(j).setSeleccted("1");
                 }
             }
-            adapter.notifyDataSetChanged();
-            currentPos = pos;
+            recyclerView.scrollToPosition(position);
+
+            callbackChanged.done();
+            currentPos = position;
             try {
 //                Objects.requireNonNull(recyclerView.findViewHolderForAdapterPosition(pos)).itemView.performClick();
 
@@ -193,5 +192,18 @@ public class ScrollToPosition {
             i = 70;
         }
         return i;
+    }
+
+    public int getPosFromSoundIndex(int i) {
+
+        int[] rangeStarts = {0, 8, 158, 235, 282, 344, 385, 437, 524, 748, 808, 854, 891, 926, 963, 997, 1030, 1070, 1108, 1166, 1206, 1258, 1304, 1339, 1382, 1412, 1438, 1469, 1502, 1563, 1593, 1645, 1718, 1767, 1844, 1872, 1921, 1961, 1996, 2025, 2080, 2117, 2154, 2249, 2286, 2321, 2347, 2382, 2407, 2442, 2484, 2517, 2561, 2597, 2620, 2650, 2701, 2751, 2780, 2829, 2866, 2908, 2949, 2981, 3041, 3082, 3131, 3171, 3215, 3255, 3292};
+
+        return (rangeStarts[i]);
+    }
+
+    public interface CallbackChanged {
+
+         void done();
+
     }
 }

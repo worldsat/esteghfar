@@ -17,6 +17,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.jamali.esteghfar70.Adapter.ShowItemListAdapter;
 import com.jamali.esteghfar70.Domain.ShowList;
 import com.jamali.esteghfar70.Helper.ScrollToPosition;
@@ -29,9 +32,6 @@ import com.jamali.esteghfar70.R;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
-
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class ShowMiddleActivity extends BaseActivity {
     private RecyclerView recyclerView;
@@ -50,18 +50,22 @@ public class ShowMiddleActivity extends BaseActivity {
     boolean doubleBackToExitPressedOnce = false;
     private static final String PREF_NAME = "RecyclerViewPrefs";
     private static final String KEY_SAVED_POSITION = "saved_position";
+    private SharedPreferences sp;
+    private ScrollToPosition scrollToPosition;
+    private LinearLayoutManager linearLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_middle);
         getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+        sp = getApplicationContext().getSharedPreferences("Token", 0);
 
         initView();
-        setupMediaPlayer();
+//        setupMediaPlayer();
         restoreSavedPosition();
         translator();
-        getData(false, false);
+//        getData(false, false);
         setupSettingsButton();
     }
 
@@ -88,19 +92,34 @@ public class ShowMiddleActivity extends BaseActivity {
     }
 
     private void translator() {
+
         switch1.setOnCheckedChangeListener((compoundButton, isChecked) -> {
             translate = isChecked; // تنظیم مقدار translate
-            int audioResource = isChecked ? R.raw.aac_full4 : R.raw.without_translate;
+
             if (medPlayer != null) {
                 medPlayer.stop();
                 medPlayer.release();
                 medPlayer = null;
             }
-            medPlayer = MediaPlayer.create(this, audioResource);
+            playBtn.setBackgroundResource(R.mipmap.play_icon);
+            seekBar.setProgress(0);
+
             setupMediaPlayer();
-            getData(!isChecked, isChecked); // بروزرسانی لیست بر اساس وضعیت
+            getData(!isChecked, isChecked);
+            sp.edit().putBoolean("translate", translate).apply();
         });
+
+        if (sp.getBoolean("translate", true)) {
+            switch1.setChecked(true);
+        } else {
+            switch1.setChecked(false);
+            translate = false;
+
+            setupMediaPlayer();
+            getData(true, false);
+        }
     }
+
     private void setupMediaPlayer() {
         int initialAudioResource = translate ? R.raw.aac_full4 : R.raw.without_translate;
 
@@ -123,7 +142,12 @@ public class ShowMiddleActivity extends BaseActivity {
         medPlayer.setOnCompletionListener(mp -> playBtn.setBackgroundResource(R.mipmap.play_icon));
 
         // بازگرداندن ScrollToPosition
-        ScrollToPosition scrollToPosition = new ScrollToPosition(recyclerView, response, adapter);
+        scrollToPosition = new ScrollToPosition(recyclerView, response, new ScrollToPosition.CallbackChanged() {
+            @Override
+            public void done() {
+                adapter.notifyDataSetChanged();
+            }
+        });
 
         playBtn.setOnClickListener(view -> {
             if (medPlayer.isPlaying()) {
@@ -147,16 +171,17 @@ public class ShowMiddleActivity extends BaseActivity {
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 // پخش صدا در هنگام جابه‌جایی موقتاً متوقف می‌شود
-                if (medPlayer != null && medPlayer.isPlaying()) {
-                    medPlayer.pause();
-                    playBtn.setBackgroundResource(R.mipmap.play_icon); // به‌روزرسانی آیکون
-                }
+//                if (medPlayer != null && medPlayer.isPlaying()) {
+//                    medPlayer.pause();
+//                    playBtn.setBackgroundResource(R.mipmap.play_icon); // به‌روزرسانی آیکون
+//                }
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 // فقط موقعیت صدا تغییر می‌کند، پخش خودکار انجام نمی‌شود
                 if (medPlayer != null) {
+
                     medPlayer.seekTo(seekBar.getProgress() * 1000);
                 }
             }
@@ -165,7 +190,7 @@ public class ShowMiddleActivity extends BaseActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser && medPlayer != null) {
                     medPlayer.seekTo(progress * 1000);
-
+                    Log.i(TAG, "onStopTrackingTouch: " + seekBar.getProgress());
                     // محاسبه زمان جدید
                     String currentTime = String.format("%02d:%02d",
                             TimeUnit.SECONDS.toMinutes(progress),
@@ -182,7 +207,6 @@ public class ShowMiddleActivity extends BaseActivity {
         });
 
 
-
         updateSeekBar = new Runnable() {
             @Override
             public void run() {
@@ -194,7 +218,9 @@ public class ShowMiddleActivity extends BaseActivity {
                     SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
                     if (sp.getBoolean("scrollToPosition", true)) {
                         if (!translate) {
-                            scrollToPosition.GoTo(scrollToPosition.getPosFromSound(currentPos));
+
+                            float speed = sp.getFloat("speed", 1.0f); // تنظیم سرعت
+                            scrollToPosition.GoTo(scrollToPosition.getPosFromSound(((currentPos))));
                         }
                     }
 
@@ -208,8 +234,6 @@ public class ShowMiddleActivity extends BaseActivity {
             }
         };
     }
-
-
 
 
     private void startSeekBarUpdate() {
@@ -239,6 +263,7 @@ public class ShowMiddleActivity extends BaseActivity {
     private void getData(boolean filter, boolean switching) {
         SettingsBll settingsBll = new SettingsBll(this);
         settingsBll.setMode(false);
+
         ArrayList<Filter> filters = new ArrayList<>();
         if (filter) {
             filters.add(new Filter("Kind", "text"));
@@ -246,18 +271,36 @@ public class ShowMiddleActivity extends BaseActivity {
         controller().Get(ShowList.class, filters, 1, 1, true, new CallbackGet() {
             @Override
             public <T> void onSuccess(ArrayList<T> result, int count) {
-                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ShowMiddleActivity.this);
+                linearLayoutManager = new LinearLayoutManager(ShowMiddleActivity.this);
+
                 recyclerView.setLayoutManager(linearLayoutManager);
+
+
                 response.clear();
                 response.addAll((Collection<? extends ShowList>) result);
+
                 for (ShowList item : response) {
                     item.setSeleccted("0");
+                    if (item.getKind().equals("text")) {
+                        item.setSize(sp.getFloat("textSizeArabic", 24));
+                    } else if (item.getKind().equals("row")) {
+                        item.setSize(sp.getFloat("textSizePersian", 16));
+                    }
                 }
-                if (switching) {
+
+                if (switching && adapter != null) {
                     adapter.notifyDataSetChanged();
                     return;
                 }
-                adapter = new ShowItemListAdapter(response);
+                adapter = new ShowItemListAdapter(response, pos -> {
+                    Log.i(TAG, "onClick: " + pos);
+                    if (!medPlayer.isPlaying()) {
+                        medPlayer.start();
+                        playBtn.setBackgroundResource(R.mipmap.pause); // تغییر آیکون به Pause
+                        startSeekBarUpdate();
+                    }
+                    medPlayer.seekTo(scrollToPosition.getPosFromSoundIndex(pos) * 1000);
+                });
                 recyclerView.setAdapter(adapter);
             }
 
@@ -273,10 +316,29 @@ public class ShowMiddleActivity extends BaseActivity {
         super.onPause();
         if (recyclerView != null) {
             LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+            assert layoutManager != null;
             savePosition(layoutManager.findLastVisibleItemPosition());
         }
         if (medPlayer != null) medPlayer.pause();
+
         stopSeekBarUpdate();
+
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (adapter != null) {
+            for (int i = 0; i < response.size(); i++) {
+                if (response.get(i).getKind().equals("text")) {
+                    response.get(i).setSize(sp.getFloat("textSizeArabic", 24));
+                } else if (response.get(i).getKind().equals("row")) {
+                    response.get(i).setSize(sp.getFloat("textSizePersian", 16));
+                }
+            }
+            adapter.notifyDataSetChanged();
+        }
     }
 
     @Override
