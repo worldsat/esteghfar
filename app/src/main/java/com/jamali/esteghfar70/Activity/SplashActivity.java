@@ -33,6 +33,7 @@ public class SplashActivity extends AppCompatActivity {
         SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
         sp.edit().putFloat("speed", 1.0f).apply();
         sp.edit().putBoolean("scrollToPosition", true).apply();
+        sp.edit().putBoolean("darkMode", false).apply();
     }
 
     private void animLogo() {

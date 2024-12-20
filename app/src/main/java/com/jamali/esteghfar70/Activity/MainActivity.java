@@ -62,6 +62,8 @@ public class MainActivity extends BaseActivity {
         SettingsBll settingsBll = new SettingsBll(this);
         settingsBll.setMode(false);
 
+
+
         btn1.setOnClickListener(view -> {
 //            Intent intent = new Intent(MainActivity.this, BeforeActivity.class);
 //

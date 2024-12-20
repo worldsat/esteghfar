@@ -9,9 +9,18 @@ public class ShowList extends BaseDomain {
     private String seleccted;
     private String Category;
     private float Size;
+    private boolean darkMode;
 
     public ShowList() {
         setTableName("1_1");
+    }
+
+    public boolean isDarkMode() {
+        return darkMode;
+    }
+
+    public void setDarkMode(boolean darkMode) {
+        this.darkMode = darkMode;
     }
 
     public float getSize() {

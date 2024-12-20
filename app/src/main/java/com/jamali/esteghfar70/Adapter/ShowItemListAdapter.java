@@ -25,14 +25,7 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private int position;
     private CallbackClicked callbackClicked;
     private Context context;
-//    private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
-//        @Override
-//        public void onClick(View view) {
-//            row_index = position;
-//            notifyDataSetChanged();
-//            callbackClicked.onClick(position);
-//        }
-//    };
+    private boolean darkMode;
     private static final int TEXT = 0;
     private static final int SUBJECT = 1;
     private static final int ROW = 2;
@@ -41,10 +34,11 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private int row_index = -1;
 
-    public ShowItemListAdapter(ArrayList<ShowList> result, CallbackClicked callbackClicked) {
+    public ShowItemListAdapter(ArrayList<ShowList> result, boolean darkMode, CallbackClicked callbackClicked) {
 
         this.array_object = result;
         this.callbackClicked = callbackClicked;
+        this.darkMode = darkMode;
 
     }
 
@@ -56,7 +50,6 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         context = parent.getContext();
         if (viewType == TEXT) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_text, parent, false);
-//            view.setOnClickListener(mOnClickListener);
             return new TextViewHolder(view);
         } else if (viewType == SUBJECT) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder, parent, false);
@@ -99,6 +92,11 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         holder.title.setText((array_object.get(position).getSubject()));
         holder.title.setTextSize(array_object.get(position).getSize());
+        if (array_object.get(position).isDarkMode()) {
+            holder.title.setTextColor(context.getResources().getColor(R.color.yellow_800));
+        }else{
+            holder.title.setTextColor(context.getResources().getColor(R.color.black));
+        }
         if (array_object.get(position).getCategory() == null || array_object.get(position).getCategory().equals("null")) {
             holder.catLayout.setVisibility(View.GONE);
         } else {
@@ -116,7 +114,11 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         if (array_object.get(position).getSeleccted().equals("0")) {
             holder.Linear.setBackgroundColor(Color.parseColor("#00ffffff"));
         } else {
+            if(array_object.get(position).isDarkMode()){
+                holder.Linear.setBackgroundColor(context.getResources().getColor(R.color.black4));
+            }else{
             holder.Linear.setBackgroundColor(Color.parseColor("#78A4FD7A"));
+            }
         }
 
 

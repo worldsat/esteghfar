@@ -8,7 +8,7 @@
     tools:context=".Activity.MiddleActivity">
 
     <ImageView
-        android:id="@+id/imageView3"
+        android:id="@+id/mainBackground"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:scaleType="fitXY"
@@ -17,6 +17,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@mipmap/back1" />
+
+    <View
+        android:id="@+id/viewtop"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/linearLayout2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/viewBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/mainBackground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/view"
@@ -62,13 +80,14 @@
             android:textColor="@color/black"
             android:textSize="11sp" />
 
-        <Button
+        <ImageView
             android:id="@+id/playBtn"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="10dp"
-            android:background="@mipmap/play_icon"
+            app:tint="@color/brown_700"
+            app:srcCompat="@mipmap/play_icon"
             android:gravity="center_vertical"
             android:padding="5dp" />
 
@@ -82,7 +101,7 @@
         android:gravity="center_vertical|end"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/imageView3">
+        app:layout_constraintTop_toTopOf="@+id/mainBackground">
 
 
         <ImageView
@@ -90,11 +109,11 @@
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:padding="5dp"
-            android:tint="#653F26"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_settings" />
+            app:srcCompat="@drawable/ic_settings"
+            app:tint="@color/brown_700" />
 
 
         <Switch
@@ -115,7 +134,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/mainTitleTxt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"

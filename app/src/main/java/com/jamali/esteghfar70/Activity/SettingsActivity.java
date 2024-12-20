@@ -5,29 +5,34 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.jamali.esteghfar70.Kernel.Activity.BaseActivity;
 import com.jamali.esteghfar70.R;
 
 public class SettingsActivity extends BaseActivity {
-
-    RadioGroup rg;
-    CheckBox checkBox;
+    private Switch darkMode;
+    private RadioGroup rg;
+    private RadioButton rd1, rd2, rd3, rd4, rd5, rd6;
+    private CheckBox checkBox;
     private TextView warningScroll;
+    private TextView speedTitleTxt, speedScrollTitleTxt, sizeTitleTxt;
     private TextView arabicText, persianText;
     private TextView plusPersian, plusArabic, minusArabic, minusPersian;
     private float textSizeArabic = 24, textSizePersian = 16; // سایز پیش‌فرض متن
-
+    private LinearLayout mainLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-        initview();
+        initsview();
+
         setVariable();
 
     }
@@ -36,6 +41,11 @@ public class SettingsActivity extends BaseActivity {
 
         SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
         String speed = String.valueOf(sp.getFloat("speed", 1.0f));
+
+        if (sp.getBoolean("darkMode", false)) {
+            setDarkMode(true);
+            darkMode.setChecked(true);
+        }
         Log.i(TAG, "setVariable: " + speed);
         switch (speed) {
             case "1.0":
@@ -58,6 +68,15 @@ public class SettingsActivity extends BaseActivity {
                 break;
         }
 
+        darkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            setDarkMode(isChecked);
+
+            if (isChecked) {
+                sp.edit().putBoolean("darkMode", true).apply();
+            } else {
+                sp.edit().putBoolean("darkMode", false).apply();
+            }
+        });
 
         rg.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.radioButton) {
@@ -155,7 +174,7 @@ public class SettingsActivity extends BaseActivity {
         sp.edit().putFloat("textSizeArabic", textSizeArabic).apply();
     }
 
-    private void initview() {
+    private void initsview() {
         rg = findViewById(R.id.radioGroup);
         checkBox = findViewById(R.id.scrollToPosition);
         minusArabic = findViewById(R.id.minusArabic);
@@ -165,5 +184,32 @@ public class SettingsActivity extends BaseActivity {
         arabicText = findViewById(R.id.arabicText);
         persianText = findViewById(R.id.persianText);
         warningScroll = findViewById(R.id.warningScroll);
+        darkMode = findViewById(R.id.switchDark);
+        mainLayout = findViewById(R.id.mainLayout);
+        speedTitleTxt = findViewById(R.id.speedTitleTxt);
+        speedScrollTitleTxt = findViewById(R.id.speedScrollTitleTxt);
+        sizeTitleTxt = findViewById(R.id.sizeTitleTxt);
+        rd1 = findViewById(R.id.radioButton);
+        rd2 = findViewById(R.id.radioButton2);
+        rd3 = findViewById(R.id.radioButton3);
+        rd4 = findViewById(R.id.radioButton4);
+        rd5 = findViewById(R.id.radioButton5);
+        rd6 = findViewById(R.id.radioButton6);
+
+    }
+
+    private void setTextColors(int color, TextView... textViews) {
+        for (TextView textView : textViews) {
+            textView.setTextColor(getResources().getColor(color));
+        }
+    }
+
+    void setDarkMode(boolean isChecked) {
+        int backgroundColor = isChecked ? R.color.black : R.color.khaki;
+        int textColor = isChecked ? R.color.yellow_800 : R.color.black2;
+
+        mainLayout.setBackgroundColor(getResources().getColor(backgroundColor));
+        setTextColors(textColor, arabicText, darkMode, speedTitleTxt, speedScrollTitleTxt, sizeTitleTxt, rd1, rd2, rd3, rd4, rd5, rd6);
+
     }
 }

@@ -3,6 +3,7 @@ package com.jamali.esteghfar70.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,13 +11,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,8 +39,9 @@ public class ShowMiddleActivity extends BaseActivity {
     private RecyclerView.Adapter adapter;
     private ArrayList<ShowList> response = new ArrayList<>();
     private MediaPlayer medPlayer;
-    private Button playBtn;
+    private ImageView playBtn;
     private TextView timeTxt;
+    private TextView mainTitleTxt;
     private SeekBar seekBar;
     private Switch switch1;
     private ImageView settingBtn;
@@ -53,6 +55,9 @@ public class ShowMiddleActivity extends BaseActivity {
     private SharedPreferences sp;
     private ScrollToPosition scrollToPosition;
     private LinearLayoutManager linearLayoutManager;
+    private boolean darkMode;
+    private ImageView mainBackground;
+    private View viewtop, viewBottom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,11 +67,34 @@ public class ShowMiddleActivity extends BaseActivity {
         sp = getApplicationContext().getSharedPreferences("Token", 0);
 
         initView();
-//        setupMediaPlayer();
+        setupDarkMode();
         restoreSavedPosition();
         translator();
-//        getData(false, false);
         setupSettingsButton();
+
+    }
+
+    private void setupDarkMode() {
+        darkMode = sp.getBoolean("darkMode", false);
+        if (darkMode) {
+            mainBackground.setImageResource(R.color.black2);
+            playBtn.setColorFilter(ContextCompat.getColor(ShowMiddleActivity.this, R.color.white), android.graphics.PorterDuff.Mode.MULTIPLY);
+            settingBtn.setColorFilter(ContextCompat.getColor(ShowMiddleActivity.this, R.color.white), android.graphics.PorterDuff.Mode.MULTIPLY);
+            timeTxt.setTextColor(getResources().getColor(R.color.white));
+            mainTitleTxt.setTextColor(getResources().getColor(R.color.white));
+            switch1.setTextColor(getResources().getColor(R.color.white));
+            viewtop.setBackgroundColor(getResources().getColor(R.color.black3));
+            viewBottom.setBackgroundColor(getResources().getColor(R.color.black3));
+        } else {
+            mainBackground.setImageResource(R.mipmap.back1);
+            playBtn.setColorFilter(ContextCompat.getColor(ShowMiddleActivity.this, R.color.brown_800), android.graphics.PorterDuff.Mode.MULTIPLY);
+            settingBtn.setColorFilter(ContextCompat.getColor(ShowMiddleActivity.this, R.color.brown_800), android.graphics.PorterDuff.Mode.MULTIPLY);
+            timeTxt.setTextColor(getResources().getColor(R.color.black));
+            mainTitleTxt.setTextColor(getResources().getColor(R.color.black));
+            switch1.setTextColor(getResources().getColor(R.color.black));
+            viewtop.setBackgroundColor(Color.parseColor("#00000000"));
+            viewBottom.setBackgroundColor(Color.parseColor("#00000000"));
+        }
     }
 
     private void initView() {
@@ -76,6 +104,10 @@ public class ShowMiddleActivity extends BaseActivity {
         seekBar = findViewById(R.id.seekBar);
         switch1 = findViewById(R.id.switch1);
         settingBtn = findViewById(R.id.settingsBtn);
+        mainBackground = findViewById(R.id.mainBackground);
+        mainTitleTxt = findViewById(R.id.mainTitleTxt);
+        viewtop = findViewById(R.id.viewtop);
+        viewBottom = findViewById(R.id.viewBottom);
     }
 
     private void restoreSavedPosition() {
@@ -101,11 +133,13 @@ public class ShowMiddleActivity extends BaseActivity {
                 medPlayer.release();
                 medPlayer = null;
             }
-            playBtn.setBackgroundResource(R.mipmap.play_icon);
+            playBtn.setImageResource(R.mipmap.play_icon);
             seekBar.setProgress(0);
 
             setupMediaPlayer();
+            setupDarkMode();
             getData(!isChecked, isChecked);
+            setDefaultValue();
             sp.edit().putBoolean("translate", translate).apply();
         });
 
@@ -139,7 +173,7 @@ public class ShowMiddleActivity extends BaseActivity {
         // مقداردهی اولیه timeTxt
         timeTxt.setText("00:00/" + totalTime);
 
-        medPlayer.setOnCompletionListener(mp -> playBtn.setBackgroundResource(R.mipmap.play_icon));
+        medPlayer.setOnCompletionListener(mp -> playBtn.setImageResource(R.mipmap.play_icon));
 
         // بازگرداندن ScrollToPosition
         scrollToPosition = new ScrollToPosition(recyclerView, response, new ScrollToPosition.CallbackChanged() {
@@ -152,7 +186,7 @@ public class ShowMiddleActivity extends BaseActivity {
         playBtn.setOnClickListener(view -> {
             if (medPlayer.isPlaying()) {
                 medPlayer.pause();
-                playBtn.setBackgroundResource(R.mipmap.play_icon); // تغییر آیکون به Play
+                playBtn.setImageResource(R.mipmap.play_icon); // تغییر آیکون به Play
             } else {
                 SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
                 float speed = sp.getFloat("speed", 1.0f); // تنظیم سرعت
@@ -160,7 +194,7 @@ public class ShowMiddleActivity extends BaseActivity {
                     medPlayer.setPlaybackParams(medPlayer.getPlaybackParams().setSpeed(speed));
                 }
                 medPlayer.start();
-                playBtn.setBackgroundResource(R.mipmap.pause); // تغییر آیکون به Pause
+                playBtn.setImageResource(R.mipmap.pause); // تغییر آیکون به Pause
                 startSeekBarUpdate();
             }
         });
@@ -173,7 +207,7 @@ public class ShowMiddleActivity extends BaseActivity {
                 // پخش صدا در هنگام جابه‌جایی موقتاً متوقف می‌شود
 //                if (medPlayer != null && medPlayer.isPlaying()) {
 //                    medPlayer.pause();
-//                    playBtn.setBackgroundResource(R.mipmap.play_icon); // به‌روزرسانی آیکون
+//                    playBtn.setImageResource(R.mipmap.play_icon); // به‌روزرسانی آیکون
 //                }
             }
 
@@ -181,7 +215,6 @@ public class ShowMiddleActivity extends BaseActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 // فقط موقعیت صدا تغییر می‌کند، پخش خودکار انجام نمی‌شود
                 if (medPlayer != null) {
-
                     medPlayer.seekTo(seekBar.getProgress() * 1000);
                 }
             }
@@ -272,9 +305,7 @@ public class ShowMiddleActivity extends BaseActivity {
             @Override
             public <T> void onSuccess(ArrayList<T> result, int count) {
                 linearLayoutManager = new LinearLayoutManager(ShowMiddleActivity.this);
-
                 recyclerView.setLayoutManager(linearLayoutManager);
-
 
                 response.clear();
                 response.addAll((Collection<? extends ShowList>) result);
@@ -292,14 +323,18 @@ public class ShowMiddleActivity extends BaseActivity {
                     adapter.notifyDataSetChanged();
                     return;
                 }
-                adapter = new ShowItemListAdapter(response, pos -> {
+                adapter = new ShowItemListAdapter(response, darkMode, pos -> {
                     Log.i(TAG, "onClick: " + pos);
-                    if (!medPlayer.isPlaying()) {
-                        medPlayer.start();
-                        playBtn.setBackgroundResource(R.mipmap.pause); // تغییر آیکون به Pause
-                        startSeekBarUpdate();
+                    if (sp.getFloat("speed", 1.0f) == 1.0f) {
+                        if (!medPlayer.isPlaying()) {
+                            medPlayer.start();
+                            playBtn.setImageResource(R.mipmap.pause); // تغییر آیکون به Pause
+                            startSeekBarUpdate();
+                        }
+                        medPlayer.seekTo(scrollToPosition.getPosFromSoundIndex(pos) * 1000);
+                    } else {
+                        Toast.makeText(ShowMiddleActivity.this, "برش به بند مورد نظر فقط در سرعت پخش استاندارد در دسترس است", Toast.LENGTH_SHORT).show();
                     }
-                    medPlayer.seekTo(scrollToPosition.getPosFromSoundIndex(pos) * 1000);
                 });
                 recyclerView.setAdapter(adapter);
             }
@@ -319,26 +354,22 @@ public class ShowMiddleActivity extends BaseActivity {
             assert layoutManager != null;
             savePosition(layoutManager.findLastVisibleItemPosition());
         }
-        if (medPlayer != null) medPlayer.pause();
+        if (medPlayer != null) {
+            medPlayer.pause();
+            playBtn.setImageResource(R.mipmap.play_icon); // تغییر آیکون به Play
+        }
 
         stopSeekBarUpdate();
-
+        setupDarkMode();
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (adapter != null) {
-            for (int i = 0; i < response.size(); i++) {
-                if (response.get(i).getKind().equals("text")) {
-                    response.get(i).setSize(sp.getFloat("textSizeArabic", 24));
-                } else if (response.get(i).getKind().equals("row")) {
-                    response.get(i).setSize(sp.getFloat("textSizePersian", 16));
-                }
-            }
-            adapter.notifyDataSetChanged();
-        }
+        setupMediaPlayer();
+        setupDarkMode();
+        setDefaultValue();
     }
 
     @Override
@@ -351,12 +382,25 @@ public class ShowMiddleActivity extends BaseActivity {
         stopSeekBarUpdate();
     }
 
+    private void setDefaultValue() {
+        if (adapter != null) {
+            for (int i = 0; i < response.size(); i++) {
+                if (response.get(i).getKind().equals("text")) {
+                    response.get(i).setSize(sp.getFloat("textSizeArabic", 24));
+                } else if (response.get(i).getKind().equals("row")) {
+                    response.get(i).setSize(sp.getFloat("textSizePersian", 16));
+                }
+                response.get(i).setDarkMode(darkMode);
+            }
+            adapter.notifyDataSetChanged();
+        }
+    }
+
     @Override
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {
             finishAffinity();
             System.exit(0);
-
         }
 
         this.doubleBackToExitPressedOnce = true;
