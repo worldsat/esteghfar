@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -107,6 +108,7 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             @Override
             public void onClick(View view) {
                 row_index = position;
+                Log.i("moh3n", "onPos: "+row_index);
                 notifyDataSetChanged();
                 callbackClicked.onClick(position);
             }
@@ -139,6 +141,26 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private void initRow(RowViewHolder holder, int position) {
         holder.title.setText(array_object.get(position).getSubject());
         holder.title.setTextSize(array_object.get(position).getSize());
+
+        holder.Linear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                row_index = position;
+                Log.i("moh3n", "onPos: "+row_index);
+                notifyDataSetChanged();
+                callbackClicked.onClick(position);
+            }
+        });
+        if (array_object.get(position).getSeleccted().equals("0")) {
+            holder.Linear.setBackgroundColor(Color.parseColor("#00ffffff"));
+        } else {
+            if(array_object.get(position).isDarkMode()){
+                holder.Linear.setBackgroundColor(context.getResources().getColor(R.color.black4));
+            }else{
+                holder.Linear.setBackgroundColor(Color.parseColor("#78A4FD7A"));
+            }
+        }
     }
 
     private void initRow2(Row2ViewHolder holder, int position) {
@@ -205,10 +227,11 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     class RowViewHolder extends RecyclerView.ViewHolder {
         TextView title;
-
+        LinearLayout Linear;
         private RowViewHolder(View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.title);
+            Linear = itemView.findViewById(R.id.Linear);
         }
     }
 

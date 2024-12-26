@@ -250,11 +250,16 @@ public class ShowMiddleActivity extends BaseActivity {
                     // به‌روزرسانی ScrollToPosition
                     SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
                     if (sp.getBoolean("scrollToPosition", true)) {
-                        if (!translate) {
+
 
                             float speed = sp.getFloat("speed", 1.0f); // تنظیم سرعت
-                            scrollToPosition.GoTo(scrollToPosition.getPosFromSound(((currentPos))));
-                        }
+                            if(translate){
+                                scrollToPosition.GoTo(scrollToPosition.getPosFromSoundTranslate(((currentPos))));
+                            }else{
+                                scrollToPosition.GoTo(scrollToPosition.getPosFromSoundWithoutTranslate(((currentPos))));
+                            }
+
+
                     }
 
                     String time = String.format("%02d:%02d",
@@ -331,7 +336,12 @@ public class ShowMiddleActivity extends BaseActivity {
                             playBtn.setImageResource(R.mipmap.pause); // تغییر آیکون به Pause
                             startSeekBarUpdate();
                         }
-                        medPlayer.seekTo(scrollToPosition.getPosFromSoundIndex(pos) * 1000);
+                        if(translate){
+                            medPlayer.seekTo(scrollToPosition.getPosFromSoundIndexTranslate(pos) * 1000);
+                        }else{
+                            medPlayer.seekTo(scrollToPosition.getPosFromSoundIndexWithoutTranslate(pos) * 1000);
+                        }
+
                     } else {
                         Toast.makeText(ShowMiddleActivity.this, "برش به بند مورد نظر فقط در سرعت پخش استاندارد در دسترس است", Toast.LENGTH_SHORT).show();
                     }
