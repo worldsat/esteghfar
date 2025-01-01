@@ -34,7 +34,8 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private static final int SUBJECT_SUB = 4;
 
     private int row_index = -1;
-
+    private int selectedPosition = -1;
+    private int lastSelectedPosition = -1;
     public ShowItemListAdapter(ArrayList<ShowList> result, boolean darkMode, CallbackClicked callbackClicked) {
 
         this.array_object = result;
@@ -108,7 +109,14 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             @Override
             public void onClick(View view) {
                 row_index = position;
+
                 Log.i("moh3n", "onPos: "+row_index);
+                if (position != RecyclerView.NO_POSITION) {
+                    lastSelectedPosition = selectedPosition;
+                    selectedPosition = position;
+                    notifyItemChanged(lastSelectedPosition);
+                    notifyItemChanged(selectedPosition);
+                }
                 notifyDataSetChanged();
                 callbackClicked.onClick(position);
             }
@@ -122,7 +130,16 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             holder.Linear.setBackgroundColor(Color.parseColor("#78A4FD7A"));
             }
         }
+        if (selectedPosition == position) {
 
+            if(array_object.get(position).isDarkMode()){
+                holder.Linear.setBackgroundColor(context.getResources().getColor(R.color.black4));
+            }else{
+                holder.Linear.setBackgroundColor(Color.parseColor("#78A4FD7A"));
+            }
+        }else{
+            holder.Linear.setBackgroundColor(Color.parseColor("#00ffffff"));
+        }
 
 //        if (row_index == position) {
 ////            holder.Linear.setBackgroundColor(Color.parseColor("#FFF59D"));
@@ -148,6 +165,12 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
                 row_index = position;
                 Log.i("moh3n", "onPos: "+row_index);
+                if (position != RecyclerView.NO_POSITION) {
+                    lastSelectedPosition = selectedPosition;
+                    selectedPosition = position;
+                    notifyItemChanged(lastSelectedPosition);
+                    notifyItemChanged(selectedPosition);
+                }
                 notifyDataSetChanged();
                 callbackClicked.onClick(position);
             }
@@ -160,6 +183,16 @@ public class ShowItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             }else{
                 holder.Linear.setBackgroundColor(Color.parseColor("#78A4FD7A"));
             }
+        }
+        if (selectedPosition == position) {
+
+            if(array_object.get(position).isDarkMode()){
+                holder.Linear.setBackgroundColor(context.getResources().getColor(R.color.black4));
+            }else{
+                holder.Linear.setBackgroundColor(Color.parseColor("#78A4FD7A"));
+            }
+        }else{
+            holder.Linear.setBackgroundColor(Color.parseColor("#00ffffff"));
         }
     }
 

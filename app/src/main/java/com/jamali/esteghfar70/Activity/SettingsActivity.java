@@ -45,6 +45,9 @@ public class SettingsActivity extends BaseActivity {
         if (sp.getBoolean("darkMode", false)) {
             setDarkMode(true);
             darkMode.setChecked(true);
+        }else{
+            setDarkMode(false);
+            darkMode.setChecked(false);
         }
         Log.i(TAG, "setVariable: " + speed);
         switch (speed) {
