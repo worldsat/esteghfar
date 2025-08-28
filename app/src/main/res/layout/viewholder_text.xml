@@ -41,7 +41,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="2dp"
-        android:fontFamily="@font/qurantaha"
+        android:fontFamily="@font/scheherazade2"
         android:text="إِلٰهِی عَظُمَ الْبَلاءُ، وَبَرِحَ الْخَفاءُ"
         android:textAlignment="center"
         android:textColor="@color/black"
