@@ -8,298 +8,349 @@
     android:background="@color/khaki"
     android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btn"
-        android:layout_width="300dp"
-        android:layout_height="51dp"
-        android:layout_gravity="center"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="8dp"
-        android:background="@mipmap/button"
-        android:fontFamily="@font/tunisia"
-        android:text="تنظیمات"
-        android:textColor="@color/brown_800"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/imageView2" />
-
-    <Switch
-        android:id="@+id/switchDark"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="20dp"
-        android:checked="false"
-        android:fontFamily="@font/karbalaei"
-        android:switchPadding="100dp"
-        android:text="حالت شب:"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <View
-        android:id="@+id/view2"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginVertical="16dp"
-        android:background="@drawable/gradint_line_bg"
-        android:visibility="visible" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:gravity="start"
-        android:orientation="horizontal"
-        android:visibility="visible">
-
-        <TextView
-            android:id="@+id/speedTitleTxt"
-            android:layout_width="wrap_content"
-            android:layout_height="33dp"
-            android:layout_marginTop="10dp"
-            android:fontFamily="@font/karbalaei"
-            android:gravity="start|center_vertical"
-            android:text="سرعت پخش صوت:"
-            android:textColor="@color/black"
-            android:textSize="18sp" />
-
-        <RadioGroup
-            android:id="@+id/radioGroup"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="50dp">
-
-            <RadioButton
-                android:id="@+id/radioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:checked="true"
-                android:fontFamily="@font/sahel"
-                android:text="استاندارد" />
-
-            <RadioButton
-                android:id="@+id/radioButton2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_weight="1"
-                android:fontFamily="@font/sahel"
-                android:text="1.1 برابر" />
-
-            <RadioButton
-                android:id="@+id/radioButton3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_weight="1"
-                android:fontFamily="@font/sahel"
-                android:text="1.2 برابر" />
-
-            <RadioButton
-                android:id="@+id/radioButton4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_weight="1"
-                android:fontFamily="@font/sahel"
-                android:text="1.3 برابر" />
-
-            <RadioButton
-                android:id="@+id/radioButton5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_weight="1"
-                android:fontFamily="@font/sahel"
-                android:text="1.4 برابر" />
-
-            <RadioButton
-                android:id="@+id/radioButton6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_weight="1"
-                android:fontFamily="@font/sahel"
-                android:text="1.5 برابر" />
-        </RadioGroup>
-
-    </LinearLayout>
-
-    <View
-        android:id="@+id/view2"
-        android:layout_width="wrap_content"
-        android:layout_height="2dp"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginVertical="16dp"
-        android:background="@drawable/gradint_line_bg"
-        android:visibility="visible" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        android:layout_marginStart="20dp"
-
-        android:layout_marginEnd="20dp"
-        android:gravity="start"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/speedScrollTitleTxt"
+            <Button
+                android:id="@+id/btn"
+                android:layout_width="300dp"
+                android:layout_height="51dp"
+                android:layout_gravity="center"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="8dp"
+                android:background="@mipmap/button"
+                android:fontFamily="@font/tunisia"
+                android:text="تنظیمات"
+                android:textColor="@color/brown_800"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/imageView2" />
+
+            <Switch
+                android:id="@+id/switchDark"
                 android:layout_width="wrap_content"
-                android:layout_height="33dp"
-
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="20dp"
+                android:checked="false"
                 android:fontFamily="@font/karbalaei"
-                android:gravity="start|center_vertical"
-                android:text="پیمایش متن به همراه صوت:"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
+                android:switchPadding="100dp"
+                android:text="حالت شب:"
+                android:textSize="18sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <CheckBox
-                android:id="@+id/scrollToPosition"
-                android:layout_width="wrap_content"
+            <View
+                android:id="@+id/view2"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginVertical="16dp"
+                android:background="@drawable/gradint_line_bg"
+                android:visibility="visible" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_gravity="start"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:gravity="start"
+                android:orientation="horizontal"
+                android:visibility="visible">
 
-                android:layout_weight="1"
-                android:checked="true" />
+                <TextView
+                    android:id="@+id/speedTitleTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="33dp"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="@font/karbalaei"
+                    android:gravity="start|center_vertical"
+                    android:text="سرعت پخش صوت:"
+                    android:textColor="@color/black"
+                    android:textSize="18sp" />
 
-        </LinearLayout>
+                <RadioGroup
+                    android:id="@+id/radioGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="50dp">
 
-        <TextView
-            android:id="@+id/warningScroll"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:fontFamily="@font/harir"
-            android:text="پیمایش متن فقط در سرعت پخش صوت استاندارد فعال می شود"
-            android:textAlignment="center"
-            android:textColor="@color/red_A700"
-            android:textSize="12sp"
-            android:visibility="gone"
-            tools:visibility="visible" />
+                    <RadioButton
+                        android:id="@+id/radioButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:checked="true"
+                        android:fontFamily="@font/sahel"
+                        android:text="استاندارد" />
 
-    </LinearLayout>
+                    <RadioButton
+                        android:id="@+id/radioButton2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/sahel"
+                        android:text="1.1 برابر" />
 
-    <View
-        android:id="@+id/view2"
-        android:layout_width="wrap_content"
-        android:layout_height="2dp"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginVertical="16dp"
-        android:background="@drawable/gradint_line_bg" />
+                    <RadioButton
+                        android:id="@+id/radioButton3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/sahel"
+                        android:text="1.2 برابر" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+                    <RadioButton
+                        android:id="@+id/radioButton4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/sahel"
+                        android:text="1.3 برابر" />
 
-        <TextView
-            android:id="@+id/sizeTitleTxt"
-            android:layout_width="match_parent"
-            android:layout_height="33dp"
-            android:layout_marginStart="20dp"
+                    <RadioButton
+                        android:id="@+id/radioButton5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/sahel"
+                        android:text="1.4 برابر" />
 
-            android:fontFamily="@font/karbalaei"
-            android:gravity="start|center_vertical"
-            android:text="سایز متن:"
-            android:textColor="@color/black"
-            android:textSize="18sp" />
+                    <RadioButton
+                        android:id="@+id/radioButton6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/sahel"
+                        android:text="1.5 برابر" />
+                </RadioGroup>
 
-        <TextView
-            android:id="@+id/arabicText"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_marginTop="16dp"
-            android:fontFamily="@font/qurantaha"
-            android:text="@string/god"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="24sp" />
+            </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@drawable/storake_bg"
-            android:orientation="horizontal">
+            <View
+                android:id="@+id/view2"
+                android:layout_width="wrap_content"
+                android:layout_height="2dp"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginVertical="16dp"
+                android:background="@drawable/gradint_line_bg"
+                android:visibility="visible" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginStart="20dp"
+
+                android:layout_marginEnd="20dp"
+                android:gravity="start"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/speedScrollTitleTxt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="33dp"
+
+                        android:fontFamily="@font/karbalaei"
+                        android:gravity="start|center_vertical"
+                        android:text="پیمایش متن به همراه صوت:"
+                        android:textColor="@color/black"
+                        android:textSize="18sp" />
+
+                    <CheckBox
+                        android:id="@+id/scrollToPosition"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+
+                        android:layout_weight="1"
+                        android:checked="true" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/warningScroll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/harir"
+                    android:text="پیمایش متن فقط در سرعت پخش صوت استاندارد فعال می شود"
+                    android:textAlignment="center"
+                    android:textColor="@color/red_A700"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/view2"
+                android:layout_width="wrap_content"
+                android:layout_height="2dp"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginVertical="16dp"
+                android:background="@drawable/gradint_line_bg" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/sizeTitleTxt"
+                    android:layout_width="match_parent"
+                    android:layout_height="33dp"
+                    android:layout_marginStart="20dp"
+
+                    android:fontFamily="@font/karbalaei"
+                    android:gravity="start|center_vertical"
+                    android:text="سایز متن:"
+                    android:textColor="@color/black"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/arabicText"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="@font/qurantaha"
+                    android:text="@string/god"
+                    android:textAlignment="center"
+                    android:textColor="@color/black"
+                    android:textSize="24sp" />
+
+                <LinearLayout
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="@drawable/storake_bg"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/minusArabic"
+                        android:layout_width="40dp"
+                        android:layout_height="30dp"
+                        android:gravity="center"
+                        android:text="-"
+
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/plusArabic"
+                        android:layout_width="40dp"
+                        android:layout_height="30dp"
+                        android:gravity="center"
+                        android:text="+"
+                        android:textColor="@color/brown_800"
+                        android:textSize="20sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/persianText"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginEnd="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:fontFamily="@font/sahel"
+                    android:text="به نام خداوند بخشند مهربان"
+                    android:textAlignment="center"
+                    android:textColor="@color/green_800"
+                    android:textDirection="rtl"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="@drawable/storake_bg"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/minusPersian"
+                        android:layout_width="40dp"
+                        android:layout_height="30dp"
+                        android:gravity="center"
+                        android:text="-"
+
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/plusPersian"
+                        android:layout_width="40dp"
+                        android:layout_height="30dp"
+                        android:gravity="center"
+                        android:text="+"
+                        android:textColor="@color/brown_800"
+                        android:textSize="20sp" />
+                </LinearLayout>
+            </LinearLayout>
+            <View
+                android:id="@+id/view2"
+                android:layout_width="wrap_content"
+                android:layout_height="2dp"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginVertical="24dp"
+                android:background="@drawable/gradint_line_bg"
+                android:visibility="visible" />
 
             <TextView
-                android:id="@+id/minusArabic"
-                android:layout_width="40dp"
-                android:layout_height="30dp"
-                android:gravity="center"
-                android:text="-"
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
 
-                android:textSize="20sp"
+                android:fontFamily="@font/harir"
+                android:textSize="18sp"
+                android:textAlignment="center"
+                android:text="راه ارتباطی با برنامه نویس جهت انتقادات و پیشنهادات:" />
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/harir"
+                android:textAlignment="center"
+                android:text="mohsen1986@gmail.com" />
+
+            <TextView
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:fontFamily="@font/sahel"
+                android:text="09132243308"
+                android:textAlignment="center"
+                android:textColor="@color/black"
                 android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/plusArabic"
-                android:layout_width="40dp"
-                android:layout_height="30dp"
-                android:gravity="center"
-                android:text="+"
-                android:textColor="@color/brown_800"
-                android:textSize="20sp" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/persianText"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginEnd="2dp"
-            android:layout_marginBottom="2dp"
-            android:fontFamily="@font/sahel"
-            android:text="به نام خداوند بخشند مهربان"
-            android:textAlignment="center"
-            android:textColor="@color/green_800"
-            android:textDirection="rtl"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <LinearLayout
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@drawable/storake_bg"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/minusPersian"
-                android:layout_width="40dp"
-                android:layout_height="30dp"
-                android:gravity="center"
-                android:text="-"
-
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/plusPersian"
-                android:layout_width="40dp"
-                android:layout_height="30dp"
-                android:gravity="center"
-                android:text="+"
-                android:textColor="@color/brown_800"
-                android:textSize="20sp" />
-        </LinearLayout>
-    </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
