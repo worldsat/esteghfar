@@ -68,6 +68,7 @@ dependencies {
 //    implementation 'com.github.yongjhih.android-proguards:android-proguards-all:-SNAPSHOT'
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'androidx.activity:activity:1.12.1'
+    implementation 'androidx.media:media:1.7.1'
 
 
 }

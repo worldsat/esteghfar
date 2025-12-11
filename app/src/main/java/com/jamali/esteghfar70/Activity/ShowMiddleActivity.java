@@ -1,8 +1,17 @@
 package com.jamali.esteghfar70.Activity;
 
+import android.Manifest;
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -10,6 +19,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.media.session.MediaSessionCompat; // ممکن است نیاز باشد
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -20,7 +30,13 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -62,17 +78,63 @@ public class ShowMiddleActivity extends BaseActivity {
     private ImageView mainBackground;
     private View viewtop, viewBottom;
 
+    // متغیرهای مربوط به نوتیفیکیشن
+    private NotificationManager notificationManager;
+    private static final String CHANNEL_ID = "media_playback_channel";
+    public static final String ACTION_PLAY = "action_play";
+    public static final String ACTION_PAUSE = "action_pause";
+
+    // رسیور برای دریافت کلیک‌های دکمه‌های نوتیفیکیشن
+    private final BroadcastReceiver mediaReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action != null) {
+                switch (action) {
+                    case ACTION_PLAY:
+                        if (medPlayer != null && !medPlayer.isPlaying()) {
+                            float speed = sp.getFloat("speed", 1.0f);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                try {
+                                    medPlayer.setPlaybackParams(medPlayer.getPlaybackParams().setSpeed(speed));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            medPlayer.start();
+                            playBtn.setImageResource(R.mipmap.pause);
+                            startSeekBarUpdate();
+                            showNotification(true);
+                        }
+                        break;
+                    case ACTION_PAUSE:
+                        if (medPlayer != null && medPlayer.isPlaying()) {
+                            medPlayer.pause();
+                            playBtn.setImageResource(R.mipmap.play_icon);
+                            // stopSeekBarUpdate(); // اختیاری: اگر می‌خواهید سیک‌بار در نوار اعلان هم متوقف شود
+                            showNotification(false);
+                        }
+                        break;
+                }
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_middle);
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // اندروید 13 و بالاتر
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+        // تنظیمات تمام صفحه و شفاف کردن نوارها
         Window window = getWindow();
-        // این پرچم‌ها باعث می‌شوند محتوا زیر نوارها کشیده شود
         window.getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION // توجه: این خط مهم است
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         );
         window.setStatusBarColor(Color.TRANSPARENT);
         window.setNavigationBarColor(Color.TRANSPARENT);
@@ -81,34 +143,61 @@ public class ShowMiddleActivity extends BaseActivity {
         sp = getApplicationContext().getSharedPreferences("Token", 0);
 
         initView();
+// ---------------------------------------------------------
+        // --- جایگزین جدید برای onBackPressed (شروع کد جدید) ---
+        // ---------------------------------------------------------
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (doubleBackToExitPressedOnce) {
+                    finishAffinity();
+                    System.exit(0);
+                    return; // مهم: بعد از خروج ادامه ندهد
+                }
+
+                doubleBackToExitPressedOnce = true;
+                Toast.makeText(ShowMiddleActivity.this, "جهت خروج از برنامه، دوباره دکمه برگشت را فشار دهید", Toast.LENGTH_SHORT).show();
+
+                new Handler(Looper.getMainLooper()).postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
+            }
+        });
+        // ---------------------------------------------------------
+        // --- (پایان کد جدید) ---
+        // ---------------------------------------------------------
+        // راه‌اندازی کانال نوتیفیکیشن و ثبت رسیور
+        createNotificationChannel();
+        registerMediaReceiver();
+
         setupDarkMode();
         restoreSavedPosition();
         translator();
         setupSettingsButton();
         setPaddingBottomLayout();
         setBazaarScore();
+    }
 
+    private void registerMediaReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_PLAY);
+        filter.addAction(ACTION_PAUSE);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
+            registerReceiver(mediaReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(mediaReceiver, filter);
+        }
     }
 
     private void setBazaarScore() {
-        // بررسی اینکه آیا قبلاً درخواست امتیازدهی نمایش داده شده است یا خیر
         boolean isRated = sp.getBoolean("isRated", false);
-
         if (!isRated) {
             try {
                 Intent intent = new Intent(Intent.ACTION_EDIT);
                 intent.setData(Uri.parse("bazaar://details?id=" + "com.jamali.esteghfar70"));
                 intent.setPackage("com.farsitel.bazaar");
                 startActivity(intent);
-
-                // ذخیره کردن این موضوع که درخواست نمایش داده شد
-                // تا در دفعات بعدی دیگر وارد این شرط نشود
                 sp.edit().putBoolean("isRated", true).apply();
-
             } catch (Exception e) {
-                // این قسمت برای جلوگیری از کرش کردن برنامه است
-                // اگر کاربر برنامه "بازار" را نصب نداشته باشد، برنامه بسته نمی‌شود
                 e.printStackTrace();
             }
         }
@@ -116,25 +205,75 @@ public class ShowMiddleActivity extends BaseActivity {
 
     private void setPaddingBottomLayout() {
         LinearLayout linearLayout = findViewById(R.id.linearLayout);
-
-        // اعمال Margin داینامیک به پایین صفحه
-        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(linearLayout, (v, insets) -> {
-            androidx.core.graphics.Insets systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars());
-
-            // دریافت پارامترهای لی‌اوت فعلی
-            androidx.constraintlayout.widget.ConstraintLayout.LayoutParams params =
-                    (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) v.getLayoutParams();
-
-            // تنظیم فاصله از پایین = ارتفاع نوار ناوبری + مقدار کمی فاصله اضافه (مثلاً 10 پیکسل) برای زیبایی
+        ViewCompat.setOnApplyWindowInsetsListener(linearLayout, (v, insets) -> {
+            androidx.core.graphics.Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) v.getLayoutParams();
+            // اضافه کردن فاصله از پایین برای جلوگیری از تداخل با نوار ناوبری
             params.bottomMargin = systemBars.bottom;
-
-            // اعمال تغییرات
             v.setLayoutParams(params);
+            return insets;
+        });
 
+        // تنظیم فاصله برای نوار وضعیت بالا (Status Bar)
+        ViewCompat.setOnApplyWindowInsetsListener(viewtop, (v, insets) -> {
+            androidx.core.graphics.Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.getLayoutParams().height = systemBars.top;
+            v.setLayoutParams(v.getLayoutParams());
             return insets;
         });
     }
 
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "پخش صوت",
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            channel.setDescription("کنترل پخش صوت");
+            channel.setSound(null, null);
+            notificationManager = getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        } else {
+            notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+    }
+    private void showNotification(boolean isPlaying) {
+        // اینتنت برای باز کردن برنامه
+        Intent intent = new Intent(this, ShowMiddleActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        // اینتنت برای دکمه Play/Pause
+        Intent actionIntent = new Intent(isPlaying ? ACTION_PAUSE : ACTION_PLAY);
+        actionIntent.setPackage(getPackageName()); // جهت اطمینان از کارکرد دکمه
+        PendingIntent pendingActionIntent = PendingIntent.getBroadcast(this, 1, actionIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        int icon = isPlaying ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play;
+        String title = isPlaying ? "توقف" : "پخش";
+
+        // تعیین متن ثابت برای نمایش در نوتیفیکیشن
+        String statusText = isPlaying ? "در حال پخش..." : "متوقف شده";
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.ic_media_play)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+                .setContentTitle("استغفار 70 بند امیر المومنین") // عنوان اصلی
+                .setContentText(statusText) // <--- تغییر: متن ثابت به جای تایمر
+                .setContentIntent(contentIntent)
+                .setOnlyAlertOnce(true)
+                .setShowWhen(false)
+                .addAction(icon, title, pendingActionIntent)
+                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                        .setShowActionsInCompactView(0))
+                .setOngoing(isPlaying); // اگر پخش است، نوتیفیکیشن حذف نشود
+
+        if (notificationManager != null) {
+            notificationManager.notify(1, builder.build());
+        }
+    }
     private void setupDarkMode() {
         darkMode = sp.getBoolean("darkMode", false);
         if (darkMode) {
@@ -185,10 +324,8 @@ public class ShowMiddleActivity extends BaseActivity {
     }
 
     private void translator() {
-
         switch1.setOnCheckedChangeListener((compoundButton, isChecked) -> {
-            translate = isChecked; // تنظیم مقدار translate
-
+            translate = isChecked;
             if (medPlayer != null) {
                 medPlayer.stop();
                 medPlayer.release();
@@ -196,6 +333,9 @@ public class ShowMiddleActivity extends BaseActivity {
             }
             playBtn.setImageResource(R.mipmap.play_icon);
             seekBar.setProgress(0);
+
+            // حذف نوتیفیکیشن هنگام تغییر مود
+            if(notificationManager != null) notificationManager.cancel(1);
 
             setupMediaPlayer();
             setupDarkMode();
@@ -209,7 +349,6 @@ public class ShowMiddleActivity extends BaseActivity {
         } else {
             switch1.setChecked(false);
             translate = false;
-
             setupMediaPlayer();
             getData(true, false);
         }
@@ -223,58 +362,45 @@ public class ShowMiddleActivity extends BaseActivity {
             medPlayer = null;
         }
 
-        medPlayer = MediaPlayer.create(this, initialAudioResource); // مقداردهی اولیه
+        medPlayer = MediaPlayer.create(this, initialAudioResource);
         seekBar.setMax(medPlayer.getDuration() / 1000);
 
-        // محاسبه زمان کل صوت
         String totalTime = String.format("%02d:%02d",
                 TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
                 TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) % 60);
 
-        // مقداردهی اولیه timeTxt
         timeTxt.setText("00:00/" + totalTime);
 
-        medPlayer.setOnCompletionListener(mp -> playBtn.setImageResource(R.mipmap.play_icon));
-
-        // بازگرداندن ScrollToPosition
-        scrollToPosition = new ScrollToPosition(recyclerView, response, new ScrollToPosition.CallbackChanged() {
-            @Override
-            public void done() {
-                adapter.notifyDataSetChanged();
-            }
+        medPlayer.setOnCompletionListener(mp -> {
+            playBtn.setImageResource(R.mipmap.play_icon);
+            showNotification(false); // بروزرسانی نوتیفیکیشن هنگام اتمام آهنگ
         });
+
+        scrollToPosition = new ScrollToPosition(recyclerView, response, () -> adapter.notifyDataSetChanged());
 
         playBtn.setOnClickListener(view -> {
             if (medPlayer.isPlaying()) {
                 medPlayer.pause();
-                playBtn.setImageResource(R.mipmap.play_icon); // تغییر آیکون به Play
+                playBtn.setImageResource(R.mipmap.play_icon);
+                showNotification(false);
             } else {
-                SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
-                float speed = sp.getFloat("speed", 1.0f); // تنظیم سرعت
+                float speed = sp.getFloat("speed", 1.0f);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     medPlayer.setPlaybackParams(medPlayer.getPlaybackParams().setSpeed(speed));
                 }
                 medPlayer.start();
-                playBtn.setImageResource(R.mipmap.pause); // تغییر آیکون به Pause
+                playBtn.setImageResource(R.mipmap.pause);
                 startSeekBarUpdate();
+                showNotification(true);
             }
         });
 
-
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                // پخش صدا در هنگام جابه‌جایی موقتاً متوقف می‌شود
-//                if (medPlayer != null && medPlayer.isPlaying()) {
-//                    medPlayer.pause();
-//                    playBtn.setImageResource(R.mipmap.play_icon); // به‌روزرسانی آیکون
-//                }
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                // فقط موقعیت صدا تغییر می‌کند، پخش خودکار انجام نمی‌شود
                 if (medPlayer != null) {
                     medPlayer.seekTo(seekBar.getProgress() * 1000);
                 }
@@ -284,22 +410,16 @@ public class ShowMiddleActivity extends BaseActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser && medPlayer != null) {
                     medPlayer.seekTo(progress * 1000);
-                    Log.i(TAG, "onStopTrackingTouch: " + seekBar.getProgress());
-                    // محاسبه زمان جدید
                     String currentTime = String.format("%02d:%02d",
                             TimeUnit.SECONDS.toMinutes(progress),
                             progress % 60);
-
                     String totalTime = String.format("%02d:%02d",
                             TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
                             TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) % 60);
-
-                    // به‌روزرسانی textView
                     timeTxt.setText(currentTime + "/" + totalTime);
                 }
             }
         });
-
 
         updateSeekBar = new Runnable() {
             @Override
@@ -308,32 +428,28 @@ public class ShowMiddleActivity extends BaseActivity {
                     int currentPos = medPlayer.getCurrentPosition() / 1000;
                     seekBar.setProgress(currentPos);
 
-                    // به‌روزرسانی ScrollToPosition
-                    SharedPreferences sp = getApplicationContext().getSharedPreferences("Token", 0);
                     if (sp.getBoolean("scrollToPosition", true)) {
-
-
-                            float speed = sp.getFloat("speed", 1.0f); // تنظیم سرعت
-                            if(translate){
-                                scrollToPosition.GoTo(scrollToPosition.getPosFromSoundTranslate(((currentPos))));
-                            }else{
-                                scrollToPosition.GoTo(scrollToPosition.getPosFromSoundWithoutTranslate(((currentPos))));
-                            }
-
-
+                        if (translate) {
+                            scrollToPosition.GoTo(scrollToPosition.getPosFromSoundTranslate(((currentPos))));
+                        } else {
+                            scrollToPosition.GoTo(scrollToPosition.getPosFromSoundWithoutTranslate(((currentPos))));
+                        }
                     }
 
                     String time = String.format("%02d:%02d",
                             TimeUnit.MILLISECONDS.toMinutes(medPlayer.getCurrentPosition()),
                             TimeUnit.MILLISECONDS.toSeconds(medPlayer.getCurrentPosition()) % 60);
 
-                    timeTxt.setText(time + "/" + totalTime); // به‌روزرسانی مقدار زمان
+                    String total = String.format("%02d:%02d",
+                            TimeUnit.MILLISECONDS.toMinutes(medPlayer.getDuration()),
+                            TimeUnit.MILLISECONDS.toSeconds(medPlayer.getDuration()) % 60);
+
+                    timeTxt.setText(time + "/" + total);
                     mHandler.postDelayed(this, 1000);
                 }
             }
         };
     }
-
 
     private void startSeekBarUpdate() {
         mHandler.post(updateSeekBar);
@@ -349,9 +465,7 @@ public class ShowMiddleActivity extends BaseActivity {
 
     private void savePosition(int position) {
         SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt(KEY_SAVED_POSITION, position);
-        editor.apply();
+        prefs.edit().putInt(KEY_SAVED_POSITION, position).apply();
     }
 
     private void clearSavedPosition() {
@@ -390,19 +504,18 @@ public class ShowMiddleActivity extends BaseActivity {
                     return;
                 }
                 adapter = new ShowItemListAdapter(response, darkMode, pos -> {
-                    Log.i(TAG, "onClick: " + pos);
                     if (sp.getFloat("speed", 1.0f) == 1.0f) {
                         if (!medPlayer.isPlaying()) {
                             medPlayer.start();
-                            playBtn.setImageResource(R.mipmap.pause); // تغییر آیکون به Pause
+                            playBtn.setImageResource(R.mipmap.pause);
                             startSeekBarUpdate();
+                            showNotification(true);
                         }
-                        if(translate){
+                        if (translate) {
                             medPlayer.seekTo(scrollToPosition.getPosFromSoundIndexTranslate(pos) * 1000);
-                        }else{
+                        } else {
                             medPlayer.seekTo(scrollToPosition.getPosFromSoundIndexWithoutTranslate(pos) * 1000);
                         }
-
                     } else {
                         Toast.makeText(ShowMiddleActivity.this, "برش به بند مورد نظر فقط در سرعت پخش استاندارد در دسترس است", Toast.LENGTH_SHORT).show();
                     }
@@ -425,20 +538,26 @@ public class ShowMiddleActivity extends BaseActivity {
             assert layoutManager != null;
             savePosition(layoutManager.findLastVisibleItemPosition());
         }
-        if (medPlayer != null) {
-            medPlayer.pause();
-            playBtn.setImageResource(R.mipmap.play_icon); // تغییر آیکون به Play
-        }
 
+        // نکته مهم: اینجا مدیا پلیر متوقف نمی‌شود تا در پس‌زمینه پخش ادامه یابد
+        // فقط آپدیت سیک‌بار را متوقف می‌کنیم تا مصرف باتری بهینه شود
         stopSeekBarUpdate();
         setupDarkMode();
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        setupMediaPlayer();
+        // اگر موزیک از قبل ساخته نشده، بسازد
+        if (medPlayer == null) {
+            setupMediaPlayer();
+        } else {
+            // اگر موزیک در حال پخش است، سیک بار را مجددا فعال کند
+            if (medPlayer.isPlaying()) {
+                playBtn.setImageResource(R.mipmap.pause);
+                startSeekBarUpdate();
+            }
+        }
         setupDarkMode();
         setDefaultValue();
     }
@@ -447,9 +566,25 @@ public class ShowMiddleActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (medPlayer != null) {
+            if (medPlayer.isPlaying()) {
+                medPlayer.stop();
+            }
             medPlayer.release();
             medPlayer = null;
         }
+
+        // حذف نوتیفیکیشن
+        if (notificationManager != null) {
+            notificationManager.cancel(1);
+        }
+
+        // لغو ثبت رسیور
+        try {
+            unregisterReceiver(mediaReceiver);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         stopSeekBarUpdate();
     }
 
@@ -467,22 +602,5 @@ public class ShowMiddleActivity extends BaseActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        if (doubleBackToExitPressedOnce) {
-            finishAffinity();
-            System.exit(0);
-        }
 
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "جهت خروج از برنامه، دوباره دکمه برگشت را فشار دهید", Toast.LENGTH_SHORT).show();
-
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce = false;
-            }
-        }, 2000);
-    }
 }

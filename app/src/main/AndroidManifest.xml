@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:dist="http://schemas.android.com/apk/distribution"
     package="com.jamali.esteghfar70">
-
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <dist:module dist:instant="true" />
 
     <application
@@ -47,6 +47,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".Activity.ShowMiddleActivity"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait" />
         <activity
             android:name=".Activity.ShowMiddleActivity2"
