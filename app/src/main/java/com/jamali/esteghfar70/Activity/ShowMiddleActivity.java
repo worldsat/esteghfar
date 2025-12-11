@@ -5,13 +5,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -63,6 +66,17 @@ public class ShowMiddleActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_middle);
+
+        Window window = getWindow();
+        // این پرچم‌ها باعث می‌شوند محتوا زیر نوارها کشیده شود
+        window.getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION // توجه: این خط مهم است
+        );
+        window.setStatusBarColor(Color.TRANSPARENT);
+        window.setNavigationBarColor(Color.TRANSPARENT);
+
         getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         sp = getApplicationContext().getSharedPreferences("Token", 0);
 
@@ -71,7 +85,54 @@ public class ShowMiddleActivity extends BaseActivity {
         restoreSavedPosition();
         translator();
         setupSettingsButton();
+        setPaddingBottomLayout();
+        setBazaarScore();
 
+
+    }
+
+    private void setBazaarScore() {
+        // بررسی اینکه آیا قبلاً درخواست امتیازدهی نمایش داده شده است یا خیر
+        boolean isRated = sp.getBoolean("isRated", false);
+
+        if (!isRated) {
+            try {
+                Intent intent = new Intent(Intent.ACTION_EDIT);
+                intent.setData(Uri.parse("bazaar://details?id=" + "com.jamali.esteghfar70"));
+                intent.setPackage("com.farsitel.bazaar");
+                startActivity(intent);
+
+                // ذخیره کردن این موضوع که درخواست نمایش داده شد
+                // تا در دفعات بعدی دیگر وارد این شرط نشود
+                sp.edit().putBoolean("isRated", true).apply();
+
+            } catch (Exception e) {
+                // این قسمت برای جلوگیری از کرش کردن برنامه است
+                // اگر کاربر برنامه "بازار" را نصب نداشته باشد، برنامه بسته نمی‌شود
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void setPaddingBottomLayout() {
+        LinearLayout linearLayout = findViewById(R.id.linearLayout);
+
+        // اعمال Margin داینامیک به پایین صفحه
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(linearLayout, (v, insets) -> {
+            androidx.core.graphics.Insets systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+
+            // دریافت پارامترهای لی‌اوت فعلی
+            androidx.constraintlayout.widget.ConstraintLayout.LayoutParams params =
+                    (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) v.getLayoutParams();
+
+            // تنظیم فاصله از پایین = ارتفاع نوار ناوبری + مقدار کمی فاصله اضافه (مثلاً 10 پیکسل) برای زیبایی
+            params.bottomMargin = systemBars.bottom;
+
+            // اعمال تغییرات
+            v.setLayoutParams(params);
+
+            return insets;
+        });
     }
 
     private void setupDarkMode() {
